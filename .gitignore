@@ -1,0 +1,17 @@
+/.venv
+/dist
+/build
+/.flatpak-builder
+/builddir
+__pycache__
+not1mm_server.egg-info
+test.py
+research
+debug
+/testing
+.markdownlint.json
+venv
+uv.lock
+gitea_stuff.txt
+/.idea
+
