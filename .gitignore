@@ -3,6 +3,7 @@
 /build
 /.flatpak-builder
 /builddir
+/renfield.egg-info
 __pycache__
 not1mm_server.egg-info
 test.py
