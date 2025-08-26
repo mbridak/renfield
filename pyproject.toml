@@ -1,7 +1,7 @@
 [project]
 name = "renfield"
-version = "25.8.26.1"
-description = "Add your description here"
+version = "25.8.26.2"
+description = "Hapless and flawed servant of the not1mm contest logger."
 readme = "README.md"
 requires-python = ">=3.13"
 authors = [
@@ -16,10 +16,13 @@ dependencies = [
 ]
 
 [build-system]
-requires = [
-  "setuptools",
-  "dicttoxml",
-  ]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/mbridak/renfield"
+"Bug Tracker" = "https://github.com/mbridak/renfield/issues"
+
 
 [tool.setuptools.packages.find]
 where = ["."]
