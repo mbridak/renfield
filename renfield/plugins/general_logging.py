@@ -4,7 +4,7 @@
 
 
 # from not1mm.lib.ham_utility import get_logged_band
-from lib.plugin_common import gen_adif, get_points
+from renfield.lib.plugin_common import gen_adif, get_points
 
 # from not1mm.lib.version import __version__
 
