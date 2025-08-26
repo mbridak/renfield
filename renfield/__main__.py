@@ -541,6 +541,10 @@ class Application(App):
         self.contactsinfo.on_update(self.DB.get_statistics())
 
 
-if __name__ == "__main__":
+def run():
     app = Application()
     app.run()
+
+
+if __name__ == "__main__":
+    run()
