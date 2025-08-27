@@ -13,3 +13,7 @@ Currently it is just just a bunch of sadness.
 ## Recent Changes
 
 - [Epoch] And then there was light.
+
+## Web interface
+
+> textual serve "uvx renfield@latest"
