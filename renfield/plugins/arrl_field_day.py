@@ -3,41 +3,22 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-import logging
 
 from pathlib import Path
 
 # from PyQt6 import QtWidgets
 
-from lib.ham_utility import get_logged_band
-from lib.plugin_common import gen_adif, get_points, online_score_xml
-from lib.version import __version__
+from renfield.lib.ham_utility import get_logged_band
+from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
+from renfield.lib.version import __version__
 
-logger = logging.getLogger(__name__)
-
-ALTEREGO = None
-
-EXCHANGE_HINT = "1D ORG"
+# ALTEREGO = None
 
 name = "ARRL Field Day"
 mode = "BOTH"  # CW SSB BOTH RTTY
 cabrillo_name = "ARRL-FIELD-DAY"
 
 dupe_type = 3
-
-
-def points(self):
-    """Calc point"""
-
-    if self.contact_is_dupe > 0:
-        return 0
-
-    _mode = self.contact.get("Mode", "")
-    if _mode in "SSB, USB, LSB, FM, AM":
-        return 1
-    if _mode in "CW, RTTY, FT8":
-        return 2
-    return 0
 
 
 def show_mults(self) -> int:
@@ -80,9 +61,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    logger.debug("******Cabrillo*****")
-    logger.debug("Station: %s", f"{self.station}")
-    logger.debug("Contest: %s", f"{self.contest_settings}")
+
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -90,7 +69,6 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    logger.debug("%s", filename)
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -267,8 +245,9 @@ def cabrillo(self, file_encoding):
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
         self.show_message_box(f"Cabrillo saved to: {filename}")
     except IOError as exception:
-        logger.critical("cabrillo: IO error: %s, writing to %s", exception, filename)
-        self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
+        ...
+        # logger.critical("cabrillo: IO error: %s, writing to %s", exception, filename)
+        # self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
         return
 
 

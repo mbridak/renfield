@@ -8,7 +8,6 @@ from renfield.lib.plugin_common import gen_adif, get_points
 
 # from not1mm.lib.version import __version__
 
-EXCHANGE_HINT = ""
 name = "General Logging"
 cabrillo_name = "General-Logging"
 mode = "BOTH"  # CW SSB BOTH RTTY
