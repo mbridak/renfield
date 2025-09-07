@@ -439,6 +439,15 @@ class Application(App):
             self.update_operators_window()
             return
 
+        if json_data.get("cmd") == "STATION_STATE":
+            self.operators_seen[json_data.get("Operator", "Unknown")] = [
+                json_data.get("NetBiosName", "Unknown"),
+                json_data.get("Band", "Unknown"),
+                json_data.get("Mode", "Unknown"),
+            ]
+            self.update_operators_window()
+            return
+
         if json_data.get("cmd") == "LOG":
             self.server_msg.on_update(f"Got {json_data.get("cmd")}: {json_data=} ")
             # LOG.add_item(f"[{timestamp}] GENERATE LOG: {json_data.get('station')}")
