@@ -1,6 +1,6 @@
 [project]
 name = "renfield"
-version = "25.9.7.1"
+version = "25.9.7.2"
 description = "Hapless and flawed servant of the not1mm contest logger."
 readme = "README.md"
 requires-python = ">=3.13"
