@@ -1,6 +1,6 @@
 #!/bin/bash
-uv pip uninstall renfield
+pip uninstall -y renfield
 rm dist/*
-uv build
-uv pip install -e .
+python3 -m build
+pip install -e .
 
