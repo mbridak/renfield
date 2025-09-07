@@ -77,7 +77,7 @@ def doimp(modname) -> object:
     """
 
     # logger.debug("doimp: %s", modname)
-    return importlib.import_module(f"renfield.plugins.{modname}")
+    return importlib.import_module(f"plugins.{modname}")
 
 
 # def list_contests():
