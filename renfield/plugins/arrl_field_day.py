@@ -6,9 +6,15 @@ import datetime
 
 from pathlib import Path
 
-from lib.ham_utility import get_logged_band
-from lib.plugin_common import gen_adif, get_points, online_score_xml
-from lib.version import __version__
+# Import path may change depending on if it's dev or production.
+try:
+    from lib.ham_utility import get_logged_band
+    from lib.plugin_common import gen_adif, get_points, online_score_xml
+    from lib.version import __version__
+except (ImportError, ModuleNotFoundError):
+    from renfield.lib.ham_utility import get_logged_band
+    from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
+    from renfield.lib.version import __version__
 
 # ALTEREGO = None
 
