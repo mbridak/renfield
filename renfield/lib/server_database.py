@@ -1,4 +1,5 @@
 """Database class to store contacts"""
+
 import logging
 import sqlite3
 

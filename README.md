@@ -16,4 +16,10 @@ Currently it is just just a bunch of sadness.
 
 ## Web interface
 
+### Run latest from pypi
+
 > textual serve "uvx renfield@latest"
+
+### Run from the source tree
+
+> textual serve \_\_main\_\_.py
