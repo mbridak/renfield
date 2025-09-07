@@ -80,11 +80,11 @@ def doimp(modname) -> object:
     return importlib.import_module(f"renfield.plugins.{modname}")
 
 
-def list_contests():
-    """Prints out an enumerated list of contests"""
+# def list_contests():
+#     """Prints out an enumerated list of contests"""
 
-    for index, item in enumerate(plugins, start=1):
-        print(f"{index}: {item}")
+#     for index, item in enumerate(plugins, start=1):
+#         print(f"{index}: {item}")
 
 
 class Msg(Static):
@@ -106,7 +106,7 @@ class Msg(Static):
 
 
 class NetworkInfo(DataTable):
-    """A widget to display messages."""
+    """A widget to display UPD network information."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -130,7 +130,7 @@ class NetworkInfo(DataTable):
 
 
 class ContestInfo(DataTable):
-    """A widget to display messages."""
+    """A widget to display the current contest information."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -155,7 +155,7 @@ class ContestInfo(DataTable):
 
 
 class ContactsInfo(DataTable):
-    """A widget to display messages."""
+    """A widget to display a table of contact counts by band and mode."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -173,6 +173,29 @@ class ContactsInfo(DataTable):
         self.add_rows(stats)
 
 
+class OperatorInfo(DataTable):
+    """A widget to display contest operators."""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def on_mount(self) -> None:
+        self.zebra_style = True
+        self.show_header = True
+        self.show_cursor = False
+        ROWS = [("Operator", "Log Pos", "Band", "Mode")]
+        self.add_columns(*ROWS[0])
+
+    def on_update(self, op_list) -> None:
+        """Update the widget."""
+        ops = []
+        for opname in op_list.keys():
+            items = op_list.get(opname, ["", "", ""])
+            ops.append([opname, items[0], items[1], items[2]])
+        self.clear()
+        self.add_rows(ops)
+
+
 class Application(App):
 
     BINDINGS = [
@@ -187,6 +210,7 @@ class Application(App):
         self.active_contest: str | None = None
         self.station: str | None = None
         self.contest: object | None = None
+        self.operators_seen = {}
         self.udp_fifo: queue.Queue = queue.Queue()
         self.MULTICAST_PORT: int = 2239
         self.MULTICAST_GROUP: str = "224.1.1.1"
@@ -214,6 +238,7 @@ class Application(App):
         self.networkinfo = NetworkInfo()
         self.contestinfo = ContestInfo()
         self.contactsinfo = ContactsInfo()
+        self.operatorinfo = OperatorInfo()
 
         yield Header()
         with Vertical():
@@ -225,7 +250,7 @@ class Application(App):
                 yield Vertical(VerticalScroll(self.server_msg, id="scroll"), id="v1")
                 yield Vertical(
                     Container(self.contactsinfo, id="ph1"),
-                    Placeholder(id="ph2"),
+                    Container(self.operatorinfo, id="ph2"),
                     id="v2",
                 )
         yield Footer()
@@ -406,6 +431,12 @@ class Application(App):
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
             self.update_contacts_window()
+            self.operators_seen[json_data.get("Operator", "Unknown")] = [
+                json_data.get("NetBiosName", "Unknown"),
+                json_data.get("Band", "Unknown"),
+                json_data.get("Mode", "Unknown"),
+            ]
+            self.update_operators_window()
             return
 
         if json_data.get("cmd") == "LOG":
@@ -537,8 +568,14 @@ class Application(App):
 
     def update_contacts_window(self) -> None:
         """Shows the contacts information."""
-
         self.contactsinfo.on_update(self.DB.get_statistics())
+
+    def update_operators_window(self) -> None:
+        """
+        Shows the operators information.
+        operator_list = list[tuple[str, str, str]]
+        """
+        self.operatorinfo.on_update(self.operators_seen)
 
 
 def run():
