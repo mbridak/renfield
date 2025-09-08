@@ -253,10 +253,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-        self.show_message_box(f"Cabrillo saved to: {filename}")
-    except IOError as exception:
-        print(f"cabrillo: IO error: {exception}, writing to {filename}")
-        self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
+    except IOError:
         return
 
 

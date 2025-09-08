@@ -40,7 +40,6 @@
 
 
 import datetime
-import logging
 
 from pathlib import Path
 
@@ -57,8 +56,6 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
-
-logger = logging.getLogger(__name__)
 
 name = "CQ WPX CW"
 cabrillo_name = "CQ-WPX-CW"
@@ -164,9 +161,6 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding="utf-8"):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    logger.debug("******Cabrillo*****")
-    logger.debug("Station: %s", f"{self.station}")
-    logger.debug("Contest: %s", f"{self.contest_settings}")
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -174,7 +168,6 @@ def cabrillo(self, file_encoding="utf-8"):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    logger.debug("%s", filename)
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -348,10 +341,7 @@ def cabrillo(self, file_encoding="utf-8"):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-        self.show_message_box(f"Cabrillo saved to: {filename}")
-    except IOError as exception:
-        logger.critical("cabrillo: IO error: %s, writing to %s", exception, filename)
-        self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
+    except IOError:
         return
 
 

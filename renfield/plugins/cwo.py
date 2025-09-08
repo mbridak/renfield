@@ -28,11 +28,6 @@ import datetime
 
 from pathlib import Path
 
-# from PyQt6 import QtWidgets
-
-# from not1mm.lib.plugin_common import gen_adif, imp_adif, get_points, online_score_xml
-# from not1mm.lib.version import __version__
-
 # Import path may change depending on if it's dev or production.
 try:
     from lib.ham_utility import get_logged_band
@@ -45,7 +40,6 @@ except (ImportError, ModuleNotFoundError):
 
 name = "CWOPS - Open"
 mode = "CW"  # CW SSB BOTH RTTY
-
 cabrillo_name = "CW-OPEN"
 
 # 1 once per contest, 2 work each band, 3 each band/mode, 4 no dupe checking
@@ -106,10 +100,6 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
-    # https://www.cqwpx.com/cabrillo.htm
-    # logger.debug("******Cabrillo*****")
-    # logger.debug("Station: %s", f"{self.station}")
-    # logger.debug("Contest: %s", f"{self.contest_settings}")
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -117,7 +107,6 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    # logger.debug("%s", filename)
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -292,10 +281,8 @@ def cabrillo(self, file_encoding):
                 )
 
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-        self.show_message_box(f"Cabrillo saved to: {filename}")
     except IOError as exception:
         print("cabrillo: IO error: %s, writing to %s", exception, filename)
-        # self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
         return
 
 
@@ -317,131 +304,6 @@ def recalculate_mults(self):
         else:
             contact["IsMultiplier1"] = 0
         self.database.change_contact(contact)
-
-
-def process_esm(self, new_focused_widget=None, with_enter=False):
-    """ESM State Machine"""
-
-    # self.pref["run_state"]
-
-    # -----===== Assigned F-Keys =====-----
-    # self.esm_dict["CQ"]
-    # self.esm_dict["EXCH"]
-    # self.esm_dict["QRZ"]
-    # self.esm_dict["AGN"]
-    # self.esm_dict["HISCALL"]
-    # self.esm_dict["MYCALL"]
-    # self.esm_dict["QSOB4"]
-
-    # ----==== text fields ====----
-    # self.callsign
-    # self.sent
-    # self.receive
-    # self.other_1
-    # self.other_2
-
-    if new_focused_widget is not None:
-        self.current_widget = self.inputs_dict.get(new_focused_widget)
-
-    # print(f"checking esm {self.current_widget=} {with_enter=} {self.pref.get("run_state")=}")
-
-    for a_button in [
-        self.F1,
-        self.F2,
-        self.F3,
-        self.F4,
-        self.F5,
-        self.F6,
-        self.F7,
-        self.F8,
-        self.F9,
-        self.F10,
-        self.F11,
-        self.F12,
-    ]:
-        self.restore_button_color(a_button)
-
-    buttons_to_send = []
-
-    if self.pref.get("run_state"):
-        if self.current_widget == "callsign":
-            if len(self.callsign.text()) < 3:
-                self.make_button_green(self.esm_dict["CQ"])
-                buttons_to_send.append(self.esm_dict["CQ"])
-            elif len(self.callsign.text()) > 2:
-                self.make_button_green(self.esm_dict["HISCALL"])
-                self.make_button_green(self.esm_dict["EXCH"])
-                buttons_to_send.append(self.esm_dict["HISCALL"])
-                buttons_to_send.append(self.esm_dict["EXCH"])
-
-        elif self.current_widget in ["other_1", "other_2"]:
-            if self.other_2.text() == "" or self.other_1.text() == "":
-                self.make_button_green(self.esm_dict["AGN"])
-                buttons_to_send.append(self.esm_dict["AGN"])
-            else:
-                self.make_button_green(self.esm_dict["QRZ"])
-                buttons_to_send.append(self.esm_dict["QRZ"])
-                buttons_to_send.append("LOGIT")
-
-        if with_enter is True and bool(len(buttons_to_send)):
-            for button in buttons_to_send:
-                if button:
-                    if button == "LOGIT":
-                        self.save_contact()
-                        continue
-                    self.process_function_key(button)
-    else:
-        if self.current_widget == "callsign":
-            if len(self.callsign.text()) > 2:
-                self.make_button_green(self.esm_dict["MYCALL"])
-                buttons_to_send.append(self.esm_dict["MYCALL"])
-
-        elif self.current_widget in ["other_1", "other_2"]:
-            if self.other_2.text() == "" or self.other_1.text() == "":
-                self.make_button_green(self.esm_dict["AGN"])
-                buttons_to_send.append(self.esm_dict["AGN"])
-            else:
-                self.make_button_green(self.esm_dict["EXCH"])
-                buttons_to_send.append(self.esm_dict["EXCH"])
-                buttons_to_send.append("LOGIT")
-
-        if with_enter is True and bool(len(buttons_to_send)):
-            for button in buttons_to_send:
-                if button:
-                    if button == "LOGIT":
-                        self.save_contact()
-                        continue
-                    self.process_function_key(button)
-
-
-def populate_history_info_line(self):
-    result = self.database.fetch_call_history(self.callsign.text())
-    if result:
-        self.history_info.setText(
-            f"{result.get('Call', '')}, {result.get('Name', '')}, {result.get('Exch1', '')}, {result.get('UserText','...')}"
-        )
-    else:
-        self.history_info.setText("")
-
-
-def check_call_history(self):
-    """Fill fields from call history correctly for CWO plugin, with space after Name."""
-    result = self.database.fetch_call_history(self.callsign.text())
-    if result:
-        # Show notes in the history line
-        self.history_info.setText(f"{result.get('UserText', '')}")
-
-        # Put Name into Recd Number + Name (other_2)
-        if self.other_2.text() == "":
-            name = result.get("Name", "")
-            exch = result.get("Exch1", "")
-            # Build the text with a trailing space after name if present
-            if exch and name:
-                self.other_2.setText(f"{exch} {name} ")
-            elif name:
-                self.other_2.setText(f"{name} ")
-            elif exch:
-                self.other_2.setText(f"{exch} ")
 
 
 # --------RTC Stuff-----------
