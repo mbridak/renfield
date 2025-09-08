@@ -10,7 +10,6 @@ authors = [
 dependencies = [
     "appdata>=2.2.1",
     "dicttoxml>=1.7.16",
-    "pyqt6>=6.9.1",
     "rich>=14.1.0",
     "textual>=5.3.0",
 ]
