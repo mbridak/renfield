@@ -191,14 +191,16 @@ class Application(App):
     BINDINGS = [
         ("q", "quit_app", "Exit the application"),
         ("R", "reset_db", "Reset the database"),
+        ("c", "save_cabrillo", "Save Cabrillo"),
     ]
     contest = None
 
     def __init__(self):
         super().__init__()
-        self.DB: DataBase = DataBase("server_database.db", fsutils.HOME_PATH)
+        self.database: DataBase = DataBase("server_database.db", fsutils.HOME_PATH)
         self.active_contest: str | None = None
-        self.station: str | None = None
+        self.station: dict = {}
+        self.contest_settings: dict = {}
         self.contest: object | None = None
         self.operators_seen = {}
         self.udp_fifo: queue.Queue = queue.Queue()
@@ -306,8 +308,12 @@ class Application(App):
 
     def action_reset_db(self) -> None:
         """Reset the contest database."""
-        self.DB.reset_database()
+        self.database.reset_database()
         self.update_contacts_window()
+
+    def action_save_cabrillo(self) -> None:
+        """Save Cabrillo."""
+        self.contest.cabrillo(self, "utf-8")
 
     def send_pulse(self) -> None:
         """send heartbeat"""
@@ -410,7 +416,7 @@ class Application(App):
             json_data.pop("cmd", None)
             json_data.pop("expire", None)
 
-            self.DB.log_contact(json_data)
+            self.database.log_contact(json_data)
 
             packet = {"cmd": "RESPONSE"}
             packet["recipient"] = json_data.get("NetBiosName")
@@ -474,7 +480,7 @@ class Application(App):
                 f"\\[{timestamp}] CMD:{json_data.get('cmd', '')} From:{json_data.get('station', '')} ID:{json_data.get('ID', '')}"
             )
 
-            self.DB.delete_contact(json_data.get("unique_id", ""))
+            self.database.delete_contact(json_data.get("unique_id", ""))
 
             packet = {"cmd": "RESPONSE"}
             packet["recipient"] = json_data.get("station")
@@ -504,7 +510,7 @@ class Application(App):
             json_data.pop("expire", None)
             json_data.pop("unique_id", None)
 
-            self.DB.change_contact(json_data)
+            self.database.change_contact(json_data)
             sendme = bytes(dumps(packet), encoding="ascii")
             self.network_socket.sendto(
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
@@ -533,9 +539,12 @@ class Application(App):
             globals()["station"] = json_data.get("Station")
 
             self.active_contest = json_data.get("ContestName", "")
-            self.DB.current_contest = self.active_contest.upper().replace("_", "-")
+            self.database.current_contest = self.active_contest.upper().replace(
+                "_", "-"
+            )
             self.contest = doimp(json_data.get("ContestName"))
-            self.station = json_data.get("Station", {}).get("Call", "")
+            self.station = json_data.get("Station", {})
+            self.contest_settings = json_data
             self.update_contest_window()
             self.server_msg.on_update("")
             self.update_contacts_window()
@@ -552,7 +561,9 @@ class Application(App):
 
         if json_data.get("cmd") == "CURRENT_CONTEST":
             self.active_contest = json_data.get("ContestName", "")
-            self.DB.current_contest = self.active_contest.upper().replace("_", "-")
+            self.database.current_contest = self.active_contest.upper().replace(
+                "_", "-"
+            )
             self.server_msg.on_update("")
             self.contest = doimp(self.active_contest)
             self.update_contest_window()
@@ -567,11 +578,13 @@ class Application(App):
 
     def update_contest_window(self) -> None:
         """Shows the contest information."""
-        self.contestinfo.on_update(self.station, self.active_contest, "")
+        self.contestinfo.on_update(
+            self.station.get("Call", ""), self.active_contest, ""
+        )
 
     def update_contacts_window(self) -> None:
         """Shows the contacts information."""
-        self.contactsinfo.on_update(self.DB.get_statistics())
+        self.contactsinfo.on_update(self.database.get_statistics())
 
     def update_operators_window(self) -> None:
         """
