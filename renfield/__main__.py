@@ -83,13 +83,6 @@ def doimp(modname) -> object:
         return importlib.import_module(f"renfield.plugins.{modname}")
 
 
-# def list_contests():
-#     """Prints out an enumerated list of contests"""
-
-#     for index, item in enumerate(plugins, start=1):
-#         print(f"{index}: {item}")
-
-
 class Msg(Static):
     """A widget to display messages."""
 
@@ -97,9 +90,7 @@ class Msg(Static):
         super().__init__()
         self.contents = [""]
 
-    def on_mount(self) -> None:
-        ...
-        # self.update("Hello from renfield!")
+    def on_mount(self) -> None: ...
 
     def on_update(self, message: str) -> None:
         """Update the message."""
@@ -114,9 +105,7 @@ class NetworkInfo(DataTable):
     def __init__(self) -> None:
         super().__init__()
 
-    def on_mount(self) -> None:
-        ...
-        # self.update("Hello from renfield!")
+    def on_mount(self) -> None: ...
 
     def on_update(self, group: str, port: int, interface: str) -> None:
         """Update the message."""
@@ -138,9 +127,7 @@ class ContestInfo(DataTable):
     def __init__(self) -> None:
         super().__init__()
 
-    def on_mount(self) -> None:
-        ...
-        # self.update("Hello from renfield!")
+    def on_mount(self) -> None: ...
 
     def on_update(self, station: str, contest: str, interface: str) -> None:
         """Update the message."""
@@ -546,6 +533,7 @@ class Application(App):
             globals()["station"] = json_data.get("Station")
 
             self.active_contest = json_data.get("ContestName", "")
+            self.DB.current_contest = self.active_contest.upper().replace("_", "-")
             self.contest = doimp(json_data.get("ContestName"))
             self.station = json_data.get("Station", {}).get("Call", "")
             self.update_contest_window()
@@ -564,8 +552,11 @@ class Application(App):
 
         if json_data.get("cmd") == "CURRENT_CONTEST":
             self.active_contest = json_data.get("ContestName", "")
+            self.DB.current_contest = self.active_contest.upper().replace("_", "-")
             self.server_msg.on_update("")
             self.contest = doimp(self.active_contest)
+            self.update_contest_window()
+            self.update_contacts_window()
             print(f"Active contest set to {self.active_contest}")
 
     def update_network_window(self) -> None:
