@@ -241,8 +241,8 @@ class Application(App):
             with Horizontal(id="h2"):
                 yield Vertical(VerticalScroll(self.server_msg, id="scroll"), id="v1")
                 yield Vertical(
-                    Container(self.contactsinfo, id="ph1"),
-                    Container(self.operatorinfo, id="ph2"),
+                    Container(self.contactsinfo, id="contactsinfo"),
+                    Container(self.operatorinfo, id="operatorinfo"),
                     id="v2",
                 )
         yield Footer()
@@ -286,15 +286,15 @@ class Application(App):
         v1.styles.width = "2fr"
         v2.styles.width = "1fr"
 
-        ph1 = self.query_one("#ph1")
-        ph1.styles.height = "1fr"
-        ph1.styles.border = ("solid", "green")
-        ph1.border_title = "[blue]Contacts[/]"
+        contactsinfo = self.query_one("#contactsinfo")
+        contactsinfo.styles.height = "1fr"
+        contactsinfo.styles.border = ("solid", "green")
+        contactsinfo.border_title = "[blue]Contacts[/]"
 
-        ph2 = self.query_one("#ph2")
-        ph2.styles.height = "1fr"
-        ph2.styles.border = ("solid", "green")
-        ph2.border_title = "[blue]Operators[/]"
+        operatorinfo = self.query_one("#operatorinfo")
+        operatorinfo.styles.height = "1fr"
+        operatorinfo.styles.border = ("solid", "green")
+        operatorinfo.border_title = "[blue]Operators[/]"
 
         self.set_interval(0.2, self.server_message)
         self.set_interval(10.0, self.send_pulse)
