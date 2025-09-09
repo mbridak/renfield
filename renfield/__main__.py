@@ -302,12 +302,18 @@ class Application(App):
         self.update_contest_window()
         self.update_contacts_window()
 
+    def log_info(self, msg: str = "") -> None:
+        """send timestamped message to onscreen log"""
+        timestamp = strftime("%H:%M:%S", gmtime())
+        self.server_msg.on_update(f"\\[{timestamp}] {msg}")
+
     def action_quit_app(self) -> None:
         """Exit the application."""
         self.exit()
 
     def action_reset_db(self) -> None:
         """Reset the contest database."""
+        self.log_info("Resetting DB")
         self.database.reset_database()
         self.update_contacts_window()
 
@@ -323,7 +329,7 @@ class Application(App):
                 pulse, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
         except OSError as error:
-            logging.critical(f"OSError: {error}")
+            self.log_info(f"OSError: {error}")
 
         if self.active_contest is None:
             self.send_contest_request()
@@ -336,12 +342,11 @@ class Application(App):
                 pulse, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
         except OSError as error:
-            logging.critical(f"OSError: {error}")
+            self.log_info(f"OSError: {error}")
 
     def server_message(self) -> None:
         """Respond to network messages"""
 
-        timestamp = strftime("%H:%M:%S", gmtime())
         try:
             payload = self.network_socket.recv(2048)
         except socket.timeout:
@@ -361,57 +366,57 @@ class Application(App):
         print(json_data)
 
         if json_data.get("cmd") == "POST":
-            """
-            {
-                'TS': '2025-05-05 20:44:46',
-                'Call': 'K5TUX',
-                'Freq': 14030.0,
-                'QSXFreq': 14030.0,
-                'Mode': 'CW',
-                'ContestName': 'ARRL-FIELD-DAY',
-                'SNT': '599',
-                'RCV': '599',
-                'CountryPrefix': 'K',
-                'StationPrefix': 'K6GTE',
-                'QTH': '',
-                'Name': '',
-                'Comment': '',
-                'NR': 0,
-                'Sect': 'MO',
-                'Prec': '',
-                'CK': 0,
-                'ZN': 4,
-                'SentNr': 0,
-                'Points': 2,
-                'IsMultiplier1': 0,
-                'IsMultiplier2': 0,
-                'Power': 0,
-                'Band': '14',
-                'WPXPrefix': 'K5',
-                'Exchange1': '1B',
-                'RadioNR': '',
-                'ContestNR': '4',
-                'isMultiplier3': 0,
-                'MiscText': '',
-                'IsRunQSO': False,
-                'ContactType': '',
-                'Run1Run2': '',
-                'GridSquare': '',
-                'Operator': 'K6GTE',
-                'Continent': 'NA',
-                'RoverLocation': '',
-                'RadioInterfaced': '',
-                'NetworkedCompNr': 1,
-                'NetBiosName': 'fredo',
-                'IsOriginal': 1,
-                'ID': '42a30a19379b4171a810bb6b8ac4d9ce',
-                'CLAIMEDQSO': 1,
-                'cmd': 'POST',
-                'expire': '2025-05-05T13:45:16.061513'
-            }
-            """
-            self.server_msg.on_update(
-                f"\\[{timestamp}] CMD:{json_data.get('cmd', '')}:{json_data.get('Call', '')} From:{json_data.get('NetBiosName', '')}:{json_data.get('Operator', '')} "
+
+            # {
+            #     'TS': '2025-05-05 20:44:46',
+            #     'Call': 'K5TUX',
+            #     'Freq': 14030.0,
+            #     'QSXFreq': 14030.0,
+            #     'Mode': 'CW',
+            #     'ContestName': 'ARRL-FIELD-DAY',
+            #     'SNT': '599',
+            #     'RCV': '599',
+            #     'CountryPrefix': 'K',
+            #     'StationPrefix': 'K6GTE',
+            #     'QTH': '',
+            #     'Name': '',
+            #     'Comment': '',
+            #     'NR': 0,
+            #     'Sect': 'MO',
+            #     'Prec': '',
+            #     'CK': 0,
+            #     'ZN': 4,
+            #     'SentNr': 0,
+            #     'Points': 2,
+            #     'IsMultiplier1': 0,
+            #     'IsMultiplier2': 0,
+            #     'Power': 0,
+            #     'Band': '14',
+            #     'WPXPrefix': 'K5',
+            #     'Exchange1': '1B',
+            #     'RadioNR': '',
+            #     'ContestNR': '4',
+            #     'isMultiplier3': 0,
+            #     'MiscText': '',
+            #     'IsRunQSO': False,
+            #     'ContactType': '',
+            #     'Run1Run2': '',
+            #     'GridSquare': '',
+            #     'Operator': 'K6GTE',
+            #     'Continent': 'NA',
+            #     'RoverLocation': '',
+            #     'RadioInterfaced': '',
+            #     'NetworkedCompNr': 1,
+            #     'NetBiosName': 'fredo',
+            #     'IsOriginal': 1,
+            #     'ID': '42a30a19379b4171a810bb6b8ac4d9ce',
+            #     'CLAIMEDQSO': 1,
+            #     'cmd': 'POST',
+            #     'expire': '2025-05-05T13:45:16.061513'
+            # }
+
+            self.log_info(
+                f"CMD:{json_data.get('cmd', '')}:{json_data.get('Call', '')} From:{json_data.get('NetBiosName', '')}:{json_data.get('Operator', '')} "
             )
             json_data.pop("cmd", None)
             json_data.pop("expire", None)
@@ -445,7 +450,7 @@ class Application(App):
             return
 
         if json_data.get("cmd") == "LOG":
-            self.server_msg.on_update(f"Got {json_data.get("cmd")}: {json_data=} ")
+            self.log_info(f"Got {json_data.get("cmd")}: {json_data=} ")
             # LOG.add_item(f"[{timestamp}] GENERATE LOG: {json_data.get('station')}")
             # cabrillo()
             # packet = {"cmd": "RESPONSE"}
@@ -459,7 +464,7 @@ class Application(App):
             return
 
         if json_data.get("cmd") == "DUPE":
-            self.server_msg.on_update(f"Got {json_data.get("cmd")}: {json_data=} ")
+            self.log_info(f"Got {json_data.get("cmd")}: {json_data=} ")
             # LOG.add_item(f"[{timestamp}] Checking Dupe: {json_data.get('contact')}")
             # packet = {"cmd": "RESPONSE"}
             # packet["recipient"] = json_data.get("station")
@@ -476,8 +481,8 @@ class Application(App):
             return
 
         if json_data.get("cmd") == "DELETE":
-            self.server_msg.on_update(
-                f"\\[{timestamp}] CMD:{json_data.get('cmd', '')} From:{json_data.get('station', '')} ID:{json_data.get('ID', '')}"
+            self.log_info(
+                f"CMD:{json_data.get('cmd', '')} From:{json_data.get('station', '')} ID:{json_data.get('ID', '')}"
             )
 
             self.database.delete_contact(json_data.get("unique_id", ""))
@@ -494,8 +499,8 @@ class Application(App):
             return
 
         if json_data.get("cmd") == "CONTACTCHANGED":
-            self.server_msg.on_update(
-                f"\\[{timestamp}] CMD:{json_data.get('cmd', '')} From:{json_data.get('NetBiosName', '')} OP:{json_data.get('Operator', '')} ID:{json_data.get('ID', '')}"
+            self.log_info(
+                f"CMD:{json_data.get('cmd', '')} From:{json_data.get('NetBiosName', '')} OP:{json_data.get('Operator', '')} ID:{json_data.get('ID', '')}"
             )
             print(json_data)
             # Construct a response.
@@ -533,8 +538,8 @@ class Application(App):
             # "Club": "", "IARUZone": 6, "CQZone": 3, "STXeq": "", "SPowe": "", "SAnte": "", "SAntH1": "",
             # "SAntH2": "", "RoverQTH": ""}}
 
-            self.server_msg.on_update(
-                f"\\[{timestamp}] CMD:{json_data.get('cmd', '')} From:{json_data.get('NetBiosName', '')} OP:{json_data.get('Operator', '')}"
+            self.log_info(
+                f"CMD:{json_data.get('cmd', '')} From:{json_data.get('NetBiosName', '')} OP:{json_data.get('Operator', '')}"
             )
             globals()["station"] = json_data.get("Station")
 
@@ -546,7 +551,6 @@ class Application(App):
             self.station = json_data.get("Station", {})
             self.contest_settings = json_data
             self.update_contest_window()
-            self.server_msg.on_update("")
             self.update_contacts_window()
             print(f"Active contest set to {self.active_contest}")
             packet = {"cmd": "RESPONSE"}
