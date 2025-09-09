@@ -1,28 +1,16 @@
 #!/usr/bin/env python3
 """Not1MM Contest Contact Aggregation Server"""
 
-import logging
 import importlib
 import socket
-import time
 
 from time import gmtime, strftime
 
-import datetime
-
-# import os
 import sys
 
-# import threading
-# import argparse
 import queue
-
-# import pkgutil
-# from itertools import chain
 from json import JSONDecodeError, loads, dumps
 
-# from pathlib import Path
-# from shutil import copyfile
 # Import path may change depending on if it's dev or production.
 try:
     import renfield.lib.fsutils as fsutils
@@ -37,9 +25,6 @@ from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import Static, Header, Footer, Placeholder, DataTable
 from textual.containers import VerticalScroll, Horizontal, Vertical, Grid, Container
-
-# from textual import log
-
 
 # pylint: disable=no-name-in-module, invalid-name, c-extension-no-member, global-statement
 
