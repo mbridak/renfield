@@ -1,5 +1,7 @@
 # renfield
 
+![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/renfield2.svg)
+
 ## Danger
 
 - There is currently no need to look at this.
