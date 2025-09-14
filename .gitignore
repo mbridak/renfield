@@ -9,7 +9,6 @@ not1mm_server.egg-info
 test.py
 research
 debug
-/testing
 .markdownlint.json
 venv
 uv.lock
