@@ -29,11 +29,11 @@ LOG_FILE = USER_DATA_PATH / "renfield_debug.log"
 # Create directories if they do not exist on Linux systems
 if platform.system() not in ["Windows", "Darwin"]:
     try:
-        os.mkdir(CONFIG_PATH)
+        os.makedirs(CONFIG_PATH)
     except FileExistsError:
         ...
     try:
-        os.mkdir(USER_DATA_PATH)
+        os.makedirs(USER_DATA_PATH)
     except FileExistsError:
         ...
 
