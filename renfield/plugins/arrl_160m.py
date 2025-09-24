@@ -6,9 +6,6 @@ import datetime
 
 from pathlib import Path
 
-# from lib.plugin_common import gen_adif, get_points, online_score_xml
-# from lib.version import __version__
-
 # Import path may change depending on if it's dev or production.
 try:
     from lib.ham_utility import get_logged_band

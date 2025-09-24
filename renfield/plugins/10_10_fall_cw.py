@@ -5,9 +5,6 @@
 import datetime
 from pathlib import Path
 
-# from lib.plugin_common import gen_adif, get_points, online_score_xml
-# from lib.version import __version__
-
 # Import path may change depending on if it's dev or production.
 try:
     from lib.ham_utility import get_logged_band
@@ -79,7 +76,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    print(filename)
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -234,8 +231,10 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                if themode == "LSB" or themode == "USB":
+                if themode in ("LSB", "USB", "FM"):
                     themode = "PH"
+                if themode in ("FT8", "FT4", "RTTY"):
+                    themode = "DG"
                 frequency = str(int(contact.get("Freq", "0"))).rjust(5)
 
                 loggeddate = the_date_and_time[:10]
@@ -253,7 +252,8 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 

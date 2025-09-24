@@ -1,13 +1,8 @@
-"""CQ 160 CW plugin"""
-
 # pylint: disable=invalid-name, c-extension-no-member, unused-import, line-too-long
 
 import datetime
 
 from pathlib import Path
-
-# from lib.plugin_common import gen_adif
-# from lib.version import __version__
 
 # Import path may change depending on if it's dev or production.
 try:
