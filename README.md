@@ -10,7 +10,7 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
-- [25.9.25] Got it generating Cabrillo files. Working thru each contest plugin now.
+- [25.9.25] Got it generating Cabrillo files.
 
 ## The Idea
 
@@ -28,7 +28,7 @@ If Renfield should crash and burn, or the PC/device it is running on should catc
 - [x] Show some basic band/qso/point statistics.
 - [x] Chat functions (handled by the clients)
 - [ ] Manage giving out serial numbers.
-- [ ] Generate a Cabrillo file.
+- [x] Generate a Cabrillo file.
 - [ ] Reverse feed QSO's back to a client if requested.
 - [ ] Show Mults.
 - [ ] Indicate Dupes when queried.
