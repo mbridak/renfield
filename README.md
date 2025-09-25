@@ -2,6 +2,8 @@
 
 ![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/renfield2.svg)
 
+^ I was bored. Kinda reminds me of Sun Microsystems. ^
+
 ## Danger
 
 - There is currently no need to look at this.

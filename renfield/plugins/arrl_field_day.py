@@ -3,7 +3,6 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -16,12 +15,11 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
-# ALTEREGO = None
-
 name = "ARRL Field Day"
 mode = "BOTH"  # CW SSB BOTH RTTY
 cabrillo_name = "ARRL-FIELD-DAY"
 
+# 1 once per contest, 2 work each band, 3 each band/mode, 4 no dupe checking
 dupe_type = 3
 
 

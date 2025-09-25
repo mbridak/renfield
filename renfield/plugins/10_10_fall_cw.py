@@ -66,9 +66,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    print("******Cabrillo*****")
-    print(f"Station: {self.station}")
-    print(f"Contest: {self.contest_settings}")
+
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
