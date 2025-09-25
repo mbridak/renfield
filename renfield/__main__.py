@@ -529,10 +529,11 @@ class Application(App):
             globals()["station"] = json_data.get("Station")
 
             self.active_contest = json_data.get("ContestName", "")
-            self.database.current_contest = self.active_contest.upper().replace(
-                "_", "-"
-            )
+            # self.database.current_contest = self.active_contest.upper().replace(
+            #     "_", "-"
+            # )
             self.contest = doimp(json_data.get("ContestName"))
+            self.database.current_contest = self.contest.cabrillo_name
             self.station = json_data.get("Station", {})
             self.contest_settings = json_data
             self.update_contest_window()
@@ -550,11 +551,12 @@ class Application(App):
 
         if json_data.get("cmd") == "CURRENT_CONTEST":
             self.active_contest = json_data.get("ContestName", "")
-            self.database.current_contest = self.active_contest.upper().replace(
-                "_", "-"
-            )
+            # self.database.current_contest = self.active_contest.upper().replace(
+            #     "_", "-"
+            # )
             self.server_msg.on_update("")
             self.contest = doimp(self.active_contest)
+            self.database.current_contest = self.contest.cabrillo_name
             self.update_contest_window()
             self.update_contacts_window()
             print(f"Active contest set to {self.active_contest}")
