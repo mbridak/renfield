@@ -222,7 +222,7 @@ class Application(App):
             with Horizontal(id="h1"):
                 yield Container(self.contestinfo, id="contestinfo")
                 yield Container(self.networkinfo, id="networkinfo")
-                yield Placeholder(id="ph5")
+                yield Placeholder(id="ph5", label="ToDo")
             with Horizontal(id="h2"):
                 yield Vertical(VerticalScroll(self.server_msg, id="scroll"), id="v1")
                 yield Vertical(

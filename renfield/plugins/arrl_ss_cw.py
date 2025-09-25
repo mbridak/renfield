@@ -3,9 +3,6 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
-# import logging
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -17,8 +14,6 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
-
-# logger = logging.getLogger(__name__)
 
 name = "ARRL Sweepstakes CW"
 cabrillo_name = "ARRL-SS-CW"
@@ -91,9 +86,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    # logger.debug("******Cabrillo*****")
-    # logger.debug("Station: %s", f"{self.station}")
-    # logger.debug("Contest: %s", f"{self.contest_settings}")
+
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -101,7 +94,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    # logger.debug("%s", filename)
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -257,7 +250,7 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                if themode == "LSB" or themode == "USB":
+                if themode in ("LSB", "USB", "AM"):
                     themode = "PH"
                 frequency = str(int(contact.get("Freq", "0"))).rjust(5)
 
@@ -278,7 +271,8 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 
@@ -295,143 +289,6 @@ def recalculate_mults(self):
         else:
             contact["IsMultiplier1"] = 0
         self.database.change_contact(contact)
-
-
-def parse_exchange(self):
-    """Parse exchange..."""
-    exchange = self.other_2.text()
-    exchange = exchange.upper()
-    sn = ""
-    prec = ""
-    ck = ""
-    sec = ""
-    call = self.callsign.text()
-
-    for tokens in exchange.split():
-        text = ""
-        numb = ""
-        if tokens.isdigit():
-            if sn == "":
-                sn = tokens
-            else:
-                ck = tokens
-            continue
-        elif tokens.isalpha():
-            if len(tokens) == 1:
-                prec = tokens
-            else:
-                sec = tokens
-            continue
-        elif tokens.isalnum():
-            if tokens[:1].isalpha():
-                # print(f"{tokens} is callsign")
-                call = tokens
-                continue
-            for i, c in enumerate(tokens):
-                if c.isalpha():
-                    text = tokens[i:]
-                    numb = tokens[:i]
-                    break
-            if len(text) == 1:
-                prec = text
-                sn = numb
-            else:
-                sec = text
-                ck = numb
-    label = f"sn:{sn} p:{prec} cl:{call} ck:{ck} sec:{sec}"
-    self.exch_label.setText(label)
-    return (sn, prec, ck, sec, call)
-
-
-def process_esm(self, new_focused_widget=None, with_enter=False):
-    """ESM State Machine"""
-
-    # self.pref["run_state"]
-
-    # -----===== Assigned F-Keys =====-----
-    # self.esm_dict["CQ"]
-    # self.esm_dict["EXCH"]
-    # self.esm_dict["QRZ"]
-    # self.esm_dict["AGN"]
-    # self.esm_dict["HISCALL"]
-    # self.esm_dict["MYCALL"]
-    # self.esm_dict["QSOB4"]
-
-    # ----==== text fields ====----
-    # self.callsign
-    # self.sent
-    # self.receive
-    # self.other_1
-    # self.other_2
-
-    if new_focused_widget is not None:
-        self.current_widget = self.inputs_dict.get(new_focused_widget)
-
-    # print(f"checking esm {self.current_widget=} {with_enter=} {self.pref.get("run_state")=}")
-
-    for a_button in [
-        self.esm_dict["CQ"],
-        self.esm_dict["EXCH"],
-        self.esm_dict["QRZ"],
-        self.esm_dict["AGN"],
-        self.esm_dict["HISCALL"],
-        self.esm_dict["MYCALL"],
-        self.esm_dict["QSOB4"],
-    ]:
-        if a_button is not None:
-            self.restore_button_color(a_button)
-
-    buttons_to_send = []
-
-    if self.pref.get("run_state"):
-        if self.current_widget == "callsign":
-            if len(self.callsign.text()) < 3:
-                self.make_button_green(self.esm_dict["CQ"])
-                buttons_to_send.append(self.esm_dict["CQ"])
-            elif len(self.callsign.text()) > 2:
-                self.make_button_green(self.esm_dict["HISCALL"])
-                self.make_button_green(self.esm_dict["EXCH"])
-                buttons_to_send.append(self.esm_dict["HISCALL"])
-                buttons_to_send.append(self.esm_dict["EXCH"])
-
-        elif self.current_widget == "other_2":
-            if self.other_2.text() == "":
-                self.make_button_green(self.esm_dict["AGN"])
-                buttons_to_send.append(self.esm_dict["AGN"])
-            else:
-                self.make_button_green(self.esm_dict["QRZ"])
-                buttons_to_send.append(self.esm_dict["QRZ"])
-                buttons_to_send.append("LOGIT")
-
-        if with_enter is True and bool(len(buttons_to_send)):
-            for button in buttons_to_send:
-                if button:
-                    if button == "LOGIT":
-                        self.save_contact()
-                        continue
-                    self.process_function_key(button)
-    else:
-        if self.current_widget == "callsign":
-            if len(self.callsign.text()) > 2:
-                self.make_button_green(self.esm_dict["MYCALL"])
-                buttons_to_send.append(self.esm_dict["MYCALL"])
-
-        elif self.current_widget == "other_2":
-            if self.other_2.text() == "":
-                self.make_button_green(self.esm_dict["AGN"])
-                buttons_to_send.append(self.esm_dict["AGN"])
-            else:
-                self.make_button_green(self.esm_dict["EXCH"])
-                buttons_to_send.append(self.esm_dict["EXCH"])
-                buttons_to_send.append("LOGIT")
-
-        if with_enter is True and bool(len(buttons_to_send)):
-            for button in buttons_to_send:
-                if button:
-                    if button == "LOGIT":
-                        self.save_contact()
-                        continue
-                    self.process_function_key(button)
 
 
 def get_mults(self):

@@ -70,9 +70,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cw160.com/cabrillo.htm
-    # logger.debug("******Cabrillo*****")
-    # logger.debug("Station: %s", f"{self.station}")
-    # logger.debug("Contest: %s", f"{self.contest_settings}")
+
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -80,7 +78,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    # logger.debug("%s", filename)
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -256,7 +254,8 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 

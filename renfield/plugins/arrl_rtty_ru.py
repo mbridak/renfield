@@ -32,7 +32,6 @@ Find rules at:	https://www.arrl.org/rtty-roundup
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -137,6 +136,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -291,8 +291,22 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                if themode == "LSB" or themode == "USB":
+                if themode in ("LSB", "USB", "AM"):
                     themode = "PH"
+                if themode.strip() in (
+                    "RTTY",
+                    "RTTY-R",
+                    "LSB-D",
+                    "USB-D",
+                    "AM-D",
+                    "FM-D",
+                    "DIGI-U",
+                    "DIGI-L",
+                    "RTTYR",
+                    "PKTLSB",
+                    "PKTUSB",
+                ):
+                    themode = "RY"
                 frequency = str(int(contact.get("Freq", "0"))).rjust(5)
 
                 loggeddate = the_date_and_time[:10]
@@ -310,7 +324,8 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 

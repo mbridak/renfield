@@ -6,9 +6,6 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
-# import logging
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -20,9 +17,6 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
-
-
-# logger = logging.getLogger(__name__)
 
 name = "ARRL VHF JUN"
 mode = "BOTH"  # CW SSB BOTH RTTY
@@ -109,9 +103,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    # logger.debug("******Cabrillo*****")
-    # logger.debug("Station: %s", f"{self.station}")
-    # logger.debug("Contest: %s", f"{self.contest_settings}")
+
     now = datetime.datetime.now()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -119,7 +111,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
-    # logger.debug("%s", filename)
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -297,17 +289,16 @@ def cabrillo(self, file_encoding):
                 output_cabrillo_line(
                     f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
                     f"{contact.get('StationPrefix', '').ljust(13)} "
-                    # f"{str(contact.get('SNT', '')).ljust(3)} "
                     f"{str(contact.get('SentNr', '')).ljust(6)} "
                     f"{contact.get('Call', '').ljust(13)} "
-                    # f"{str(contact.get('RCV', '')).ljust(3)} "
                     f"{str(contact.get('NR', '')).ljust(6)}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 
@@ -315,7 +306,6 @@ def recalculate_mults(self):
     """Recalculates multipliers after change in logged qso."""
 
 
-# gridsquare
 def get_mults(self):
     """"""
 

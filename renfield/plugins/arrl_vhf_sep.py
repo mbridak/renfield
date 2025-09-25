@@ -6,7 +6,6 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -111,6 +110,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -288,17 +288,16 @@ def cabrillo(self, file_encoding):
                 output_cabrillo_line(
                     f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
                     f"{contact.get('StationPrefix', '').ljust(13)} "
-                    # f"{str(contact.get('SNT', '')).ljust(3)} "
                     f"{str(contact.get('SentNr', '')).ljust(6)} "
                     f"{contact.get('Call', '').ljust(13)} "
-                    # f"{str(contact.get('RCV', '')).ljust(3)} "
                     f"{str(contact.get('NR', '')).ljust(6)}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 
@@ -306,8 +305,6 @@ def recalculate_mults(self):
     """Recalculates multipliers after change in logged qso."""
 
 
-# !!Order!!,Call,Name,Loc1,UserText,
-# gridsquare
 def get_mults(self):
     """"""
 
