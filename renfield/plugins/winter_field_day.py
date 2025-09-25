@@ -3,7 +3,6 @@
 # pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member
 
 import datetime
-
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
@@ -22,18 +21,6 @@ mode = "BOTH"  # CW SSB BOTH RTTY
 
 # 1 once per contest, 2 work each band, 3 each band/mode, 4 no dupe checking
 dupe_type = 3
-
-
-def points(self):
-    """Calc point"""
-    if self.contact_is_dupe > 0:
-        return 0
-    _mode = self.contact.get("Mode", "")
-    if _mode in "SSB, USB, LSB, FM, AM":
-        return 1
-    if _mode in "CW, RTTY":
-        return 2
-    return 0
 
 
 def show_mults(self):
@@ -85,6 +72,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -239,9 +227,21 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                if themode == "LSB" or themode == "USB":
+                if themode in ("LSB", "USB", "FM"):
                     themode = "PH"
-                if themode == "RTTY":
+                if themode.strip() in (
+                    "RTTY",
+                    "RTTY-R",
+                    "LSB-D",
+                    "USB-D",
+                    "AM-D",
+                    "FM-D",
+                    "DIGI-U",
+                    "DIGI-L",
+                    "RTTYR",
+                    "PKTLSB",
+                    "PKTUSB",
+                ):
                     themode = "DG"
                 frequency = str(int(contact.get("Freq", "0"))).rjust(5)
 
@@ -259,7 +259,8 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError:
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 
