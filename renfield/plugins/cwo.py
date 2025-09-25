@@ -107,6 +107,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
     )
+    self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -261,7 +262,7 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                if themode == "LSB" or themode == "USB":
+                if themode in ("LSB", "USB", "FM"):
                     themode = "PH"
                 frequency = str(int(contact.get("Freq", "0"))).rjust(5)
 
@@ -281,8 +282,8 @@ def cabrillo(self, file_encoding):
                 )
 
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as exception:
-        print("cabrillo: IO error: %s, writing to %s", exception, filename)
+    except IOError as ioerror:
+        self.log_info(f"Error saving log: {ioerror}")
         return
 
 
