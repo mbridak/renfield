@@ -128,6 +128,47 @@ class DataBase:
                 conn.commit()
         except sqlite3.OperationalError as exception:
             print(f"{exception}")
+            
+    def get_next_sn(self, call: str) -> int|None:
+        """ 
+        Return next serial number.
+        Do this by getting the highest SerialNumber from the SN table and adding 1.
+        Then write this to the SN table with the call and return the serial number.
+        If no call given or call is not a string return None.
+        """
+        if istype(call) != str or len(call) == 0:
+            return None
+        call = call.upper()
+        try:
+            with sqlite3.connect(self.database) as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT count(*) from SN where Call = '{call}';")
+                call_exists = cursor.fetchone()[0]
+                cursor.execute("select max(SerialNumber) as highest from SN;")
+                highest = cursor.fetchone()[0]
+                if highest is None:
+                    highest = 0
+                highest += 1
+                if call_exists == 0:
+                    cursor.execute(
+                        f"insert into SN (SerialNumber, Call) values ({highest}, '{call}');"
+                        )
+                else:
+                    cursor.execute(
+                        f"update SN set SerialNumber = {highest} where Call = '{call}';"
+                        )
+                conn.commit()
+                return highest
+        except sqlite3.Error as exception:
+            print(f"DataBase get_next_sn: {exception}")
+            return None
+
+
+
+
+
+
+
 
     def log_contact(self, contact: dict) -> None:
         """
