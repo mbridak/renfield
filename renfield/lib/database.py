@@ -28,6 +28,8 @@ class DataBase:
 
         self.database = app_data_dir + "/" + database
         self.create_dxlog_table()
+        self.create_sn_table()
+
 
     def reset_database(self):
         """Reset DataBase instance"""
@@ -37,6 +39,8 @@ class DataBase:
         except OSError:
             ...
         self.create_dxlog_table()
+        self.create_sn_table()
+
 
     @staticmethod
     def row_factory(cursor, row):
@@ -52,6 +56,20 @@ class DataBase:
                 cursor.description,
             )
         }
+
+    def create_sn_table(self) -> None:
+        """creates the sn table"""
+        print("Creating SN Table")
+        try:
+            with sqlite3.connect(self.database) as conn:
+                cursor = conn.cursor()
+                sql_command = (
+                    "CREATE TABLE IF NOT EXISTS SN ("
+                    "SerialNumber INTEGER DEFAULT 0, "
+                    "Call VARCHAR(15) NOT NULL, "
+                    "PRIMARY KEY (SerialNumber) );"
+                )
+                cursor.execute(sql_command)
 
     def create_dxlog_table(self) -> None:
         """creates the dxlog table"""
