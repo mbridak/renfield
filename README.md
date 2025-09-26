@@ -10,6 +10,7 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
+- [25.9.26] Add support to get serial numbers from the server.
 - [25.9.25] Got it generating Cabrillo files.
   - Group chat
   - Current User/Band/Mode
@@ -30,7 +31,7 @@ If Renfield should crash and burn, or the PC/device it is running on should catc
 - [x] Handle QSO CRUD operations.
 - [x] Show some basic band/qso/point statistics.
 - [x] Chat functions (handled by the clients)
-- [ ] Manage giving out serial numbers.
+- [x] Manage giving out serial numbers.
 - [x] Generate a Cabrillo file.
 - [ ] Reverse feed QSO's back to a client if requested.
 - [ ] Show Mults.
