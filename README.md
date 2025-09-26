@@ -76,3 +76,16 @@ You or others on your network can connect to the web interface on port 8000
 ### Run from the source tree
 
 > textual serve \_\_main\_\_.py
+
+## Networking
+
+Communication between the clients and the server happens on UDP multicast port 2239 by default. Depending on your linux distribution you may need open that port in your firewall on each machine manually. I've retired from the IT field, so I'll leave that as an exercise for you.
+
+## Direct commands
+
+Interacting with the server via it's CLI or web interface is limited.
+
+ - 'q' Quits the program.
+ - 'R' Resets/Wipes the database.
+ - 'Z' Zero out the SN server.
+ - 'c' Generates a Cabrillo file for whatever contest is active.
