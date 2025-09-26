@@ -434,6 +434,17 @@ class Application(App):
             self.update_operators_window()
             return
 
+        if json_data.get("cmd") == "GET_SN":
+            next_sn = self.database.get_next_sn(json_data.get("Operator"))
+            packet = {"cmd": "RESPONSE"}
+            packet["recipient"] = json_data.get("NetBiosName")
+            packet["subject"] = "GET_SN"
+            packet["sn"] = next_sn
+            sendme = bytes(dumps(packet), encoding="ascii")
+            self.network_socket.sendto(
+                sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
+            )
+
         if json_data.get("cmd") == "LOG":
             self.log_info(f"Got {json_data.get("cmd")}: {json_data=} ")
             # LOG.add_item(f"[{timestamp}] GENERATE LOG: {json_data.get('station')}")
