@@ -2,7 +2,7 @@
 
 ![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/renfield2.svg)
 
-^ I was bored. Kinda reminds me of Sun Microsystems. ^
+<center>^ I was bored. Kinda reminds me of Sun Microsystems. ^</center>
 
 ## Danger
 
@@ -11,6 +11,9 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 ## Recent Changes
 
 - [25.9.25] Got it generating Cabrillo files.
+  - Group chat
+  - Current User/Band/Mode
+  - QSO by band/mode/points
 
 ## The Idea
 
