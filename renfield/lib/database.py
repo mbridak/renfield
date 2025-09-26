@@ -55,6 +55,33 @@ class DataBase:
             )
         }
 
+    def wipe_sn_table(self):
+        """wipes the SN table"""
+        print("Wiping SN Table")
+        try:
+            with sqlite3.connect(self.database) as conn:
+                cursor = conn.cursor()
+                sql_command = "DELETE FROM SN;"
+                cursor.execute(sql_command)
+        except sqlite3.OperationalError as exception:
+            print(f"{exception}")
+
+    def seed_sn(self, sn: int) -> None:
+        """seeds the starting serial number in the SN table"""
+
+        if sn is None:
+            return
+        print(f"Seeding SN Table with {sn}")
+        self.wipe_sn_table()
+        try:
+            with sqlite3.connect(self.database) as conn:
+                cursor = conn.cursor()
+                sql_command = "INSERT INTO SN (SerialNumber, Call) VALUES (?,?);"
+                cursor.execute(sql_command, (sn, "START"))
+                conn.commit()
+        except sqlite3.OperationalError as exception:
+            print(f"{exception}")
+
     def create_sn_table(self) -> None:
         """creates the sn table"""
         print("Creating SN Table")
