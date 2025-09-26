@@ -176,6 +176,7 @@ class Application(App):
     BINDINGS = [
         ("q", "quit_app", "Exit the application"),
         ("R", "reset_db", "Reset the database"),
+        ("Z", "zero_sn", "Zero out the serial number"),
         ("c", "save_cabrillo", "Save Cabrillo"),
     ]
     contest = None
@@ -305,6 +306,10 @@ class Application(App):
     def action_save_cabrillo(self) -> None:
         """Save Cabrillo."""
         self.contest.cabrillo(self, "utf-8")
+
+    def zero_sn(self) -> None:
+        """Zero out the serial number"""
+        self.database.wipe_sn_table()
 
     def send_pulse(self) -> None:
         """send heartbeat"""
