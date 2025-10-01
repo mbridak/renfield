@@ -3,7 +3,7 @@ name = "renfield"
 version = "25.9.26"
 description = "Hapless and flawed servant of the not1mm contest logger."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 authors = [
   { name="Michael Bridak", email="michael.bridak@gmail.com" },
 ]
@@ -11,7 +11,7 @@ dependencies = [
     "appdata>=2.2.1",
     "dicttoxml>=1.7.16",
     "rich>=14.1.0",
-    "textual>=6.1.0",
+    "textual>=6.2.0",
 ]
 
 [build-system]
