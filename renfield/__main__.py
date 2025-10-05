@@ -451,7 +451,7 @@ class Application(App):
             )
 
         if json_data.get("cmd") == "LOG":
-            self.log_info(f"Got {json_data.get("cmd")}: {json_data=} ")
+            self.log_info(f"Got {json_data.get('cmd')}: {json_data=} ")
             # LOG.add_item(f"[{timestamp}] GENERATE LOG: {json_data.get('station')}")
             # cabrillo()
             # packet = {"cmd": "RESPONSE"}
@@ -464,21 +464,41 @@ class Application(App):
             # )
             return
 
-        if json_data.get("cmd") == "DUPE":
-            self.log_info(f"Got {json_data.get("cmd")}: {json_data=} ")
-            # LOG.add_item(f"[{timestamp}] Checking Dupe: {json_data.get('contact')}")
-            # packet = {"cmd": "RESPONSE"}
-            # packet["recipient"] = json_data.get("station")
-            # packet["subject"] = "DUPE"
-            # packet["contact"] = json_data.get("contact")
-            # _call = json_data.get("contact")
-            # _mode = json_data.get("mode")
-            # _band = json_data.get("band")
-            # the_count = DB.get_dupe_status(_call, _band, _mode)
-            # packet["isdupe"] = the_count
-            # bytes_to_send = bytes(dumps(packet), encoding="ascii")
-            # s.sendto(bytes_to_send, (MULTICAST_GROUP, MULTICAST_PORT))
-            # # comm_log()
+        if json_data.get("cmd") == "ISDUPE":
+            # {
+            #     "cmd": "ISDUPE"
+            #     "Operator": self.current_op
+            #     "NetBiosName": socket.gethostname()
+            #     "Call": = call
+            #     "Band": = band
+            #     "Mode": = mode
+            # }
+            # self.log_info(f"Got {json_data.get('cmd')}: {json_data=} ")
+            call = json_data.get("Call")
+            band = json_data.get("Band")
+            mode = json_data.get("Mode")
+            result = False
+            if self.contest.dupe_type == 1:
+                result = self.database.check_dupe(call)
+            if self.contest.dupe_type == 2:
+                result = self.database.check_dupe_on_band(call, band)
+            if self.contest.dupe_type == 3:
+                result = self.database.check_dupe_on_band_mode(call, band, mode)
+            if self.contest.dupe_type == 4:
+                result = {"isdupe": False}
+            if self.contest.dupe_type == 5:
+                result = {"isdupe": False}  # in case contest has no function.
+                if not hasattr(self.contest, "check_dupe"):
+                    result = self.contest.specific_contest_check_dupe(self, call)
+
+            packet = {"cmd": "RESPONSE"}
+            packet["recipient"] = json_data.get("NetBiosName")
+            packet["subject"] = "ISDUPE"
+            packet["isdupe"] = bool(result.get("isdupe", False))
+            sendme = bytes(dumps(packet), encoding="ascii")
+            self.network_socket.sendto(
+                sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
+            )
             return
 
         if json_data.get("cmd") == "DELETE":
