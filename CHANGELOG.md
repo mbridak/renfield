@@ -1,5 +1,6 @@
 # Changelog
 
+- [25-10-5] Add Dupe checking.
 - [25.9.26] Add support to get serial numbers from the server.
 - [25.9.25] Got it generating Cabrillo files.
   - Group chat
