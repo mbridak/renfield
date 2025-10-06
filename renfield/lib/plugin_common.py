@@ -3,8 +3,13 @@
 import datetime
 from decimal import Decimal
 from pathlib import Path
-from renfield.lib.ham_utility import get_adif_band
-from renfield.lib.version import __version__
+
+try:
+    from renfield.lib.ham_utility import get_adif_band
+    from renfield.lib.version import __version__
+except (ImportError, ModuleNotFoundError):
+    from lib.ham_utility import get_adif_band
+    from lib.version import __version__
 
 
 def online_score_xml(self):

@@ -53,12 +53,12 @@ if args.band:
 else:
     BAND = bands[random.randint(0, len(bands) - 1)]
 
-modes = ("CW", "PH", "DI")
+modes = ("CW", "SSB", "RTTY")
 if args.mode:
     if args.mode.upper() in modes:
         MODE = args.mode.upper()
     else:
-        print('Allowed modes: "CW", "PH", "DI"')
+        print('Allowed modes: "CW", "SSB", "RTTY"')
         raise SystemExit(1)
 else:
     MODE = modes[random.randint(0, len(modes) - 1)]
