@@ -184,7 +184,7 @@ def fakefreq(band, mode):
     This will return a sane value for a frequency mainly for the cabrillo and adif log.
     Takes a band and mode as input and returns freq in khz.
     """
-    _modes = {"CW": 0, "DI": 1, "PH": 2, "FT8": 1, "SSB": 2}
+    _modes = {"CW": 0, "RTTY": 1, "FT8": 1, "SSB": 2}
     fakefreqs = {
         "160": ["1830", "1805", "1840"],
         "80": ["3530", "3559", "3970"],
@@ -211,6 +211,9 @@ def log_contact():
     """Send a contgact to the server."""
     unique_id = uuid.uuid4().hex
     callsign = generate_callsign()
+    points = 2
+    if MODE == "SSB":
+        points = 1
     contact = {
         "TS": datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -233,7 +236,7 @@ def log_contact():
         "CK": 0,
         "ZN": 4,
         "SentNr": 0,
-        "Points": 2,
+        "Points": points,
         "IsMultiplier1": 0,
         "IsMultiplier2": 0,
         "Power": POWER,
