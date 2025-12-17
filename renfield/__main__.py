@@ -106,6 +106,39 @@ class NetworkInfo(DataTable):
         self.add_rows(ROWS[1:])
 
 
+class ScoringInfo(DataTable):
+    """A widget to display UPD network information."""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def on_mount(self) -> None: ...
+
+    def on_update(self, the_object) -> None:
+        """Update the message."""
+        self.clear()
+
+        if the_object.contest is None:
+            points = 0
+            mults = 0
+            score = 0
+        else:
+            points = the_object.contest.get_points(the_object)
+            mults = the_object.contest.show_mults(the_object)
+            score = the_object.contest.calc_score(the_object)
+
+        ROWS = [
+            ("", ""),
+            (Text("Points:", justify="right"), f"{points}"),
+            (Text("Mults:", justify="right"), f"{mults}"),
+            (Text("Score:", justify="right"), f"{score}"),
+        ]
+        self.show_header = False
+        self.show_cursor = False
+        self.add_columns(*ROWS[0])
+        self.add_rows(ROWS[1:])
+
+
 class ContestInfo(DataTable):
     """A widget to display the current contest information."""
 
@@ -217,13 +250,14 @@ class Application(App):
         self.contestinfo = ContestInfo()
         self.contactsinfo = ContactsInfo()
         self.operatorinfo = OperatorInfo()
+        self.scoringinfo = ScoringInfo()
 
         yield Header()
         with Vertical():
             with Horizontal(id="h1"):
                 yield Container(self.contestinfo, id="contestinfo")
                 yield Container(self.networkinfo, id="networkinfo")
-                yield Placeholder(id="ph5", label="ToDo")
+                yield Container(self.scoringinfo, id="scoringinfo")
             with Horizontal(id="h2"):
                 yield Vertical(VerticalScroll(self.server_msg, id="scroll"), id="v1")
                 yield Vertical(
@@ -256,16 +290,16 @@ class Application(App):
         h2.styles.height = "2fr"
         contestinfo = self.query_one("#contestinfo")
         networkinfo = self.query_one("#networkinfo")
-        ph5 = self.query_one("#ph5")
+        scoringinfo = self.query_one("#scoringinfo")
         contestinfo.styles.width = "1fr"
         networkinfo.styles.width = "1fr"
-        ph5.styles.width = "1fr"
+        scoringinfo.styles.width = "1fr"
         contestinfo.styles.border = ("solid", "green")
         networkinfo.styles.border = ("solid", "green")
-        ph5.styles.border = ("solid", "green")
+        scoringinfo.styles.border = ("solid", "green")
         contestinfo.border_title = "[blue]Group[/]"
         networkinfo.border_title = "[blue]Network[/]"
-        ph5.border_title = "[blue]Scoring[/]"
+        scoringinfo.border_title = "[blue]Scoring[/]"
 
         v1 = self.query_one("#v1")
         v2 = self.query_one("#v2")
@@ -285,6 +319,7 @@ class Application(App):
         self.set_interval(0.2, self.server_message)
         self.set_interval(10.0, self.send_pulse)
         self.update_network_window()
+        self.update_scoring_window()
         self.update_contest_window()
         self.update_contacts_window()
 
@@ -428,6 +463,7 @@ class Application(App):
                 json_data.get("Mode", "Unknown"),
             ]
             self.update_operators_window()
+            self.update_scoring_window()
             return
 
         if json_data.get("cmd") == "STATION_STATE":
@@ -517,6 +553,7 @@ class Application(App):
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
             self.update_contacts_window()
+            self.update_scoring_window()
             return
 
         if json_data.get("cmd") == "CONTACTCHANGED":
@@ -542,6 +579,7 @@ class Application(App):
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
             self.update_contacts_window()
+            self.update_scoring_window()
             return
 
         if json_data.get("cmd") == "NEWDB":
@@ -574,6 +612,7 @@ class Application(App):
             self.contest_settings = json_data
             self.update_contest_window()
             self.update_contacts_window()
+            self.update_scoring_window()
             print(f"Active contest set to {self.active_contest}")
             packet = {"cmd": "RESPONSE"}
             packet["recipient"] = json_data.get("NetBiosName")
@@ -595,6 +634,7 @@ class Application(App):
             self.database.current_contest = self.contest.cabrillo_name
             self.update_contest_window()
             self.update_contacts_window()
+            self.update_scoring_window()
             print(f"Active contest set to {self.active_contest}")
 
     def update_network_window(self) -> None:
@@ -602,6 +642,10 @@ class Application(App):
         self.networkinfo.on_update(
             self.MULTICAST_GROUP, self.MULTICAST_PORT, self.INTERFACE_IP
         )
+
+    def update_scoring_window(self) -> None:
+        """Shows the network information."""
+        self.scoringinfo.on_update(self)
 
     def update_contest_window(self) -> None:
         """Shows the contest information."""
