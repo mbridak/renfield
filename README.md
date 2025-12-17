@@ -38,8 +38,6 @@ If Renfield should crash and burn, or the PC/device it is running on should catc
 - [x] Generate a Cabrillo file.
 - [x] Indicate Dupes when queried.
 - [ ] Reverse feed QSO's back to a client if requested.
-- [ ] Show Mults.
-
 
 ## Installation
 
