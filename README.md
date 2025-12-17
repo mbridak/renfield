@@ -31,6 +31,7 @@ If Renfield should crash and burn, or the PC/device it is running on should catc
 - [x] Make a stupid logo.
 - [x] Discover which contest is being run.
 - [x] Handle QSO CRUD operations.
+- [x] Show Points, Mults and Score.
 - [x] Show some basic band/qso/point statistics.
 - [x] Chat functions (handled by the clients)
 - [x] Manage giving out serial numbers.
