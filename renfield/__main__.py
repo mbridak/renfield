@@ -224,7 +224,7 @@ class Application(App):
         self.operators_seen = {}
         self.udp_fifo: queue.Queue = queue.Queue()
         self.MULTICAST_PORT: int = 2239
-        self.MULTICAST_GROUP: str = "224.1.1.1"
+        self.MULTICAST_GROUP: str = "239.1.1.1"
         self.INTERFACE_IP: str = "0.0.0.0"
         self.network_socket: socket.socket = socket.socket(
             socket.AF_INET, socket.SOCK_DGRAM
