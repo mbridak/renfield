@@ -1,5 +1,6 @@
 # Changelog
 
+- [25-12-21] changed multicast from 224.1.1.1 to 239.1.1.1
 - [25-12-16] Add score widget.
 - [25-10-5] Add Dupe checking.
 - [25.9.26] Add support to get serial numbers from the server.
