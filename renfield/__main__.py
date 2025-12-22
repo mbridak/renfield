@@ -364,6 +364,7 @@ class Application(App):
         """send contest request"""
         try:
             pulse = b'{"cmd": "CONTEST_REQUEST", "host": "server"}'
+            self.log_info(f"{pulse}=")
             self.network_socket.sendto(
                 pulse, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
@@ -383,13 +384,13 @@ class Application(App):
             json_data = loads(payload.decode())
         except UnicodeDecodeError as err:
             the_error = f"Not Unicode: {err}\n{payload}\n"
-            print(the_error)
+            self.log_info(the_error)
             return
         except JSONDecodeError as err:
             the_error = f"Not JSON: {err}\n{payload}\n"
-            print(the_error)
+            self.log_info(the_error)
             return
-        print(json_data)
+        self.log_info(json_data)
 
         if json_data.get("cmd") == "POST":
 
