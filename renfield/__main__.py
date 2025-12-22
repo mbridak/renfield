@@ -350,6 +350,7 @@ class Application(App):
         """send heartbeat"""
         try:
             pulse = b'{"cmd": "PING", "host": "server"}'
+            self.log_info(f"{pulse}=")
             self.network_socket.sendto(
                 pulse, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
