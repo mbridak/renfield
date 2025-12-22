@@ -241,7 +241,7 @@ class Application(App):
         self.network_socket.setsockopt(
             socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, bytes(mreq)
         )
-        self.network_socket.settimeout(0.1)
+        self.network_socket.settimeout(0.5)
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -360,7 +360,7 @@ class Application(App):
             self.send_contest_request()
 
     def send_contest_request(self) -> None:
-        """send heartbeat"""
+        """send contest request"""
         try:
             pulse = b'{"cmd": "CONTEST_REQUEST", "host": "server"}'
             self.network_socket.sendto(
@@ -583,19 +583,19 @@ class Application(App):
             return
 
         if json_data.get("cmd") == "NEWDB":
-            # {"ContestID": 1, "ContestName": "general_logging", "StartDate": "2025-08-13 00:00:00",
-            # "OperatorCategory": "SINGLE-OP", "BandCategory": "ALL", "PowerCategory": "LOW",
-            # "ModeCategory": "CW", "OverlayCategory": "N/A", "ClaimedScore": "'''''''0'''''''",
-            # "Operators": "k6gte", "Soapbox": "", "SentExchange": "", "ContestNR": 1, "SubType": null,
-            # "StationCategory": "FIXED", "AssistedCategory": "ASSISTED", "TransmitterCategory": "ONE",
-            # "TimeCategory": null, "cmd": "NEWDB", "expire": "2025-08-24T09:36:36.212594",
-            # "NetBiosName": "fredo", "Operator": "K6GTE", "ID": "713af39d088d467ab7dfc431debc59e9",
+            # {
+            # "ContestID": 3, "ContestName": "cwt", "StartDate": "2025-12-21 00:00:00", "OperatorCategory": "SINGLE-OP",
+            # "BandCategory": "ALL", "PowerCategory": "LOW", "ModeCategory": "CW", "OverlayCategory": "N/A",
+            # "ClaimedScore": "'''''''0'''''''", "Operators": "K6GTE", "Soapbox": "", "SentExchange": "CWA",
+            # "ContestNR": 3, "SubType": null, "StationCategory": "FIXED", "AssistedCategory": "ASSISTED",
+            # "TransmitterCategory": "ONE", "TimeCategory": null, "cmd": "NEWDB", "expire": "2025-12-21T14:02:30.648688",
+            # "NetBiosName": "fredo", "Operator": "K6GTE", "ID": "6a17a0805f1944aa874ca916f5f573a3",
             # "Station": {"Call": "K6GTE", "Name": "Michael Bridak", "Email": "michael.bridak@gmail.com",
-            # "Street1": "2854 W Bridgeport Ave", "Street2": "", "City": "Anaheim", "State": "CA",
-            # "Zip": "92804", "Country": "United States", "GridSquare": "dm13at", "LicenseClass": "General",
-            # "Latitude": 33.8125, "Longitude": -117.9583, "PacketNode": "N/A", "ARRLSection": "ORG",
-            # "Club": "", "IARUZone": 6, "CQZone": 3, "STXeq": "", "SPowe": "", "SAnte": "", "SAntH1": "",
-            # "SAntH2": "", "RoverQTH": ""}}
+            # "Street1": "2854 W Bridgeport Ave", "Street2": "", "City": "Anaheim", "State": "CA", "Zip": "92804",
+            # "Country": "United States", "GridSquare": "dm13at", "LicenseClass": "General", "Latitude": 33.8125,
+            # "Longitude": -117.9583, "PacketNode": "N/A", "ARRLSection": "ORG", "Club": "", "IARUZone": 6, "CQZone": 3,
+            # "STXeq": "", "SPowe": "", "SAnte": "", "SAntH1": "", "SAntH2": "", "RoverQTH": ""}
+            # }
 
             self.log_info(
                 f"CMD:{json_data.get('cmd', '')} From:{json_data.get('NetBiosName', '')} OP:{json_data.get('Operator', '')}"
@@ -603,9 +603,6 @@ class Application(App):
             globals()["station"] = json_data.get("Station")
 
             self.active_contest = json_data.get("ContestName", "")
-            # self.database.current_contest = self.active_contest.upper().replace(
-            #     "_", "-"
-            # )
             self.contest = doimp(json_data.get("ContestName"))
             self.database.current_contest = self.contest.cabrillo_name
             self.station = json_data.get("Station", {})
@@ -626,9 +623,6 @@ class Application(App):
 
         if json_data.get("cmd") == "CURRENT_CONTEST":
             self.active_contest = json_data.get("ContestName", "")
-            # self.database.current_contest = self.active_contest.upper().replace(
-            #     "_", "-"
-            # )
             self.server_msg.on_update("")
             self.contest = doimp(self.active_contest)
             self.database.current_contest = self.contest.cabrillo_name
