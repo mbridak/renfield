@@ -15,7 +15,7 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
-name = "QSO Party SN+County"
+name = "QSO PARTY SN"
 mode = "BOTH"  # CW SSB BOTH RTTY
 cabrillo_name = "QSO_PARTY"
 
@@ -26,10 +26,7 @@ dupe_type = 4
 def show_mults(self) -> int:
     """Return display string for mults"""
     result = int(self.database.fetch_mult_count(1).get("count", 0))
-    if result:
-        return result
-    else:
-        return 0
+    return result
 
 
 def show_qso(self) -> int:
@@ -255,9 +252,12 @@ def cabrillo(self, file_encoding):
                     f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
                     f"{contact.get('StationPrefix', '').ljust(13)} "
                     f"{str(contact.get('SentNr', '')).ljust(6)} "
-                    f"{contact.get('Section', '').ljust(13)} "
+                    # TODO: In not1mm, write this station's county to... RoverLocation field?
+                    #f"{contact.get('RoverLocation', '*').ljust(13)} "
+                    #       For now, just insert an asterisk.
+                    f"*             "
                     f"{contact.get('Call', '').ljust(13)} "
-                    f"{str(contact.get('RcvNr', '')).ljust(6)} "
+                    f"{str(contact.get('NR', '')).ljust(6)} "
                     f"{str(contact.get('Exchange1', '')).ljust(25)}",
                     "\r\n",
                     file_descriptor,
@@ -280,7 +280,6 @@ def set_self(the_outie):
 
 def get_mults(self):
     """"""
-
     mults = {}
     return mults
 
