@@ -337,6 +337,7 @@ class Application(App):
         self.log_info("Resetting DB")
         self.database.reset_database()
         self.update_contacts_window()
+        self.update_scoring_window()
 
     def action_save_cabrillo(self) -> None:
         """Save Cabrillo."""
