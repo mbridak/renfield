@@ -1,5 +1,6 @@
 # Changelog
 
+- [2026-03-03] Merge pull request #4 from ki4mcw/rover-logic
 - [2026-02-26] Merge pull request #3 from ki4mcw/QSO-Party-1.1
 - [2026-02-25] Merge pull request #2 from ki4mcw/qso_party_1st_draft
 - [2025-12-21] Increase network socket timeout to 0.5 seconds and update contest request documentation
