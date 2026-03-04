@@ -228,10 +228,7 @@ def cabrillo(self, file_encoding):
             for contact in log:
                 the_date_and_time = contact.get("TS", "")
                 themode = contact.get("Mode", "")
-                #if themode in ("LSB", "USB", "FM"):
-                #    themode = "PH"
-                #if themode in ("FT8", "FT4", "RTTY"):
-                #    themode = "DG"
+
                 match themode:
                     case "LSB"|"USB"|"SSB"|"FM"|"AM":
                         themode = "PH"
@@ -248,14 +245,20 @@ def cabrillo(self, file_encoding):
 
                 loggeddate = the_date_and_time[:10]
                 loggedtime = the_date_and_time[11:13] + the_date_and_time[14:16]
+                if contact.get('RoverLocation', ''):
+                    location = f"{contact.get('RoverLocation').ljust(15).upper()}"
+                elif self.contest_settings.get('SentExchange', ''):
+                    location = f"{self.contest_settings.get('SentExchange', '').ljust(15).upper()}"
+                else:
+                    # user did not provide any location info,
+                    # so insert a placeholder in cabrillo file
+                    location = f"*              "
+
                 output_cabrillo_line(
                     f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
                     f"{contact.get('StationPrefix', '').ljust(13)} "
                     f"{str(contact.get('SentNr', '')).ljust(6)} "
-                    # TODO: In not1mm, write this station's county to... RoverLocation field?
-                    #f"{contact.get('RoverLocation', '*').ljust(13)} "
-                    #       For now, just insert an asterisk.
-                    f"*             "
+                    f"{location} "
                     f"{contact.get('Call', '').ljust(13)} "
                     f"{str(contact.get('NR', '')).ljust(6)} "
                     f"{str(contact.get('Exchange1', '')).ljust(25)}",
