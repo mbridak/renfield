@@ -604,7 +604,12 @@ class Application(App):
             globals()["station"] = json_data.get("Station")
 
             self.active_contest = json_data.get("ContestName", "")
-            self.contest = doimp(json_data.get("ContestName"))
+            try:
+                self.contest = doimp(json_data.get("ContestName"))
+            except Exception:
+                print(f"No plugin found for {self.active_contest}")
+                self.log_info(f"No plugin found for {self.active_contest}")
+                return
             self.database.current_contest = self.contest.cabrillo_name
             self.station = json_data.get("Station", {})
             self.contest_settings = json_data
