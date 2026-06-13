@@ -15,6 +15,9 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
+assert get_logged_band
+assert online_score_xml
+
 name = "ARRL Field Day"
 mode = "BOTH"  # CW SSB BOTH RTTY
 cabrillo_name = "ARRL-FIELD-DAY"
@@ -69,7 +72,7 @@ def cabrillo(self, file_encoding):
     filename = (
         str(Path.home())
         + "/"
-        + f"{self.station.get('Call', '').upper()}_{cabrillo_name}_{date_time}.log"
+        + f"{self.station.get('Call', '').upper().replace('/','-')}_{cabrillo_name}_{date_time}.log"
     )
     self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()

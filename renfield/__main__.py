@@ -28,6 +28,9 @@ from textual.containers import VerticalScroll, Horizontal, Vertical, Grid, Conta
 
 # pylint: disable=no-name-in-module, invalid-name, c-extension-no-member, global-statement
 
+assert Placeholder
+assert Grid
+
 
 class Trafficlog:
     """holds recent udp log traffic"""
