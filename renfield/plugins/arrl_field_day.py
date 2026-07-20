@@ -72,7 +72,7 @@ def cabrillo(self, file_encoding):
     filename = (
         str(Path.home())
         + "/"
-        + f"{self.station.get('Call', '').upper().replace('/','-')}_{cabrillo_name}_{date_time}.log"
+        + f"{self.station.get('Call', '').upper().replace('/', '-')}_{cabrillo_name}_{date_time}.log"
     )
     self.log_info(f"Saving log to:{filename}")
     log = self.database.fetch_all_contacts_asc()
@@ -104,7 +104,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -116,19 +116,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -143,26 +143,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -179,7 +179,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -260,11 +260,6 @@ def cabrillo(self, file_encoding):
 
 def recalculate_mults(self):
     """Recalculates multipliers after change in logged qso."""
-
-
-def set_self(the_outie):
-    """..."""
-    globals()["ALTEREGO"] = the_outie
 
 
 def get_mults(self):
