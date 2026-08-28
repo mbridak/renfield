@@ -1,7 +1,3 @@
-"""10 10 fall cw plugin"""
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
 import datetime
 from pathlib import Path
 
@@ -57,7 +53,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -69,7 +64,7 @@ def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -256,7 +251,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving log: {ioerror}")
         return
 
@@ -266,12 +261,10 @@ def recalculate_mults(self):
 
 
 def get_mults(self):
-    """"""
 
     mults = {}
     return mults
 
 
 def just_points(self):
-    """"""
     return get_points(self)
