@@ -2,29 +2,26 @@
 """Not1MM Contest Contact Aggregation Server"""
 
 import importlib
-import socket
-
-from time import gmtime, strftime
-
-import sys
-
 import queue
-from json import JSONDecodeError, loads, dumps
+import socket
+import sys
+from json import JSONDecodeError, dumps, loads
+from time import gmtime, strftime
 
 # Import path may change depending on if it's dev or production.
 try:
-    import renfield.lib.fsutils as fsutils
-    from renfield.lib.version import __version__
+    from renfield.lib import fsutils
     from renfield.lib.database import DataBase
+    from renfield.lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    import lib.fsutils as fsutils
-    from lib.version import __version__
+    from lib import fsutils
     from lib.database import DataBase
+    from lib.version import __version__
 
 from rich.text import Text
 from textual.app import App, ComposeResult
-from textual.widgets import Static, Header, Footer, Placeholder, DataTable
-from textual.containers import VerticalScroll, Horizontal, Vertical, Grid, Container
+from textual.containers import Container, Grid, Horizontal, Vertical, VerticalScroll
+from textual.widgets import DataTable, Footer, Header, Placeholder, Static
 
 # pylint: disable=no-name-in-module, invalid-name, c-extension-no-member, global-statement
 
@@ -64,7 +61,6 @@ def doimp(modname) -> object:
     The module object.
     """
 
-    # logger.debug("doimp: %s", modname)
     try:
         return importlib.import_module(f"plugins.{modname}")
     except (ImportError, ModuleNotFoundError):
@@ -208,7 +204,6 @@ class OperatorInfo(DataTable):
 
 
 class Application(App):
-
     BINDINGS = [
         ("q", "quit_app", "Exit the application"),
         ("R", "reset_db", "Reset the database"),
@@ -378,7 +373,7 @@ class Application(App):
 
         try:
             payload = self.network_socket.recv(2048)
-        except socket.timeout:
+        except TimeoutError:
             return
         if not payload:
             return
@@ -395,7 +390,6 @@ class Application(App):
         print(json_data)
 
         if json_data.get("cmd") == "POST":
-
             # {
             #     'TS': '2025-05-05 20:44:46',
             #     'Call': 'K5TUX',
