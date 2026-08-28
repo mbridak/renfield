@@ -10,6 +10,13 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
+- [2026-08-28] @mbridak Refactor: remove unused functions and logging, update contest query parameters
+- [2026-08-27] @mbridak add CQP
+- [2026-07-20] @mbridak Fix: formatting issues in Cabrillo output and add missing assertions
+  - @mbridak Removed unused function.
+  - @mbridak Refactor IARU HF plugin: remove unused points function, improve score calcula...
+- [2026-06-13] @mbridak Add EUDX
+  - @mbridak add asserts to remove warnings.
 - [2026-05-28] Fix crash when no plugin found.
 - [2026-03-11] Adding RSGB IOTA
 - [2026-03-03] Merge pull request #4 from ki4mcw/rover-logic

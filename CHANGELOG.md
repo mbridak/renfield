@@ -1,18 +1,52 @@
 # Changelog
 
-- [2026-05-28] Fix crash when no plugin found.
-- [2026-03-11] Adding RSGB IOTA
+- [2026-08-28] @mbridak Refactor: remove unused functions and logging, update contest query parameters
+- [2026-08-27] @mbridak add CQP
+- [2026-07-20] @mbridak Fix: formatting issues in Cabrillo output and add missing assertions
+  - @mbridak Removed unused function.
+  - @mbridak Refactor IARU HF plugin: remove unused points function, improve score calcula...
+- [2026-06-13] @mbridak Add EUDX
+  - @mbridak add asserts to remove warnings.
+- [2026-05-28] Bump version to 26.5.28, fix crash when no plugin found, and update changelog and README
+- [2026-03-11] Bump version to 26.3.11, add RSGB IOTA plugin, and update changelog and README
+- [2026-03-04] Bump version to 26.3.4 and update changelog and README with recent changes
 - [2026-03-03] Merge pull request #4 from ki4mcw/rover-logic
+  - add roving logic from Not1MM
+- [2026-02-27] Bump version to 26.2.27 and update changelog and README with recent changes
+  - Just some scripts to get changes from a date.
+  - add scratch.txt
 - [2026-02-26] Merge pull request #3 from ki4mcw/QSO-Party-1.1
+  - QSO Party 1.1
 - [2026-02-25] Merge pull request #2 from ki4mcw/qso_party_1st_draft
+- [2026-02-24] QSO Party 1st draft
 - [2025-12-21] Increase network socket timeout to 0.5 seconds and update contest request documentation
-- [2025-12-21] changed multicast from 224.1.1.1 to 239.1.1.1
-- [2025-12-16] Add score widget.
-- [2025-10-5] Add Dupe checking.
-- [2025.9.26] Add support to get serial numbers from the server.
-- [2025.9.25] Got it generating Cabrillo files.
-  - Group chat
-  - Current User/Band/Mode
-  - QSO by band/mode/points
-- [Epoch] And then there was light.
-
+  - Update version to 25.12.21 and reflect multicast address change in changelog and README
+  - Update multicast group address to 239.1.1.1
+- [2025-12-16] Remove checklist item for showing Mults in README
+  - Add checklist item to show Points, Mults, and Score in README
+  - Merge branch 'main' of https://github.com/mbridak/renfield
+  - Update version to 25.12.16 and add score widget to changelog and README
+  - Merge pull request #1 from mbridak/show-score
+  - Add ScoringInfo widget to display contest scoring details
+  - Refactor operator string construction in Cabrillo output
+- [2025-10-06] Update FUNDING.yml
+  - updated
+  - Add design file
+  - Update frequency modes and adjust points calculation in log_contact function
+  - Update import statements and modify allowed modes in simulator
+- [2025-10-05] Update README to indicate Dupes when queried in the tasks list
+  - Refactor command handling in Application class to improve logging and add ISDUPE comma...
+  - Bump
+- [2025-09-30] Bump version to 25.9.30 in pyproject.toml and version.py
+  - Update Python requirements and dependencies in pyproject.toml
+- [2025-09-26] @mbridak Update Docs.
+  - Add key command to zero out the serial number server.
+  - @mbridak Add functions to zero out or seed serial number.
+  - @mbridak Bump and doc
+  - @mbridak Add GET_SN command.
+  - add scratch file
+  - Refactor database methods for clarity and error handling
+  - @mbridak Add function to return next SN.
+  - @mbridak Add a table for serial number tracking.
+- [2025-09-25] more
+  - Add issue templates for bug reports and feature requests
