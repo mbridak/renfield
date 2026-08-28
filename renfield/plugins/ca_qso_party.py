@@ -1,41 +1,8 @@
-"""California QSO Party plugin"""
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
-#   California QSO Party
-#   Status: Active
-#   Geographic Focus: US
-#   Participation: Worldwide
-#   Mode: CW, Phone
-#   Bands: 160, 80, 40, 20, 15, 10 meters
-#   Classes: Single-Op (QRP/Low/High), Single-Op-Assisted (QRP/Low/High),
-#            Multi-Single (QRP/Low/High), Multi-Two (QRP/Low/High),
-#            Multi-Multi (QRP/Low/High), Checklog
-#   Max operating hours: 24 (SO/SOA), 30 (Multi)
-#   Max power: HP: >100 watts, LP: <=100 watts, QRP: <=5 watts
-#   Exchange: Serial No. + 4-letter county abbreviation (CA stations)
-#             Serial No. + 2-letter state/province/DX (non-CA stations)
-#   Work stations: Once per band per mode (max 12 QSOs per station)
-#   QSO Points: 3 points per QSO (Phone and CW)
-#   Multipliers:
-#     CA stations: US states + Canadian provinces/territories (max 58)
-#     Non-CA stations: 58 California counties (max 58)
-#     DX does not count as a multiplier for CA stations
-#   Score Calculation: Total QSO points x total multipliers
-#   Cabrillo name: CQP
-#   Cabrillo QSO format:
-#     QSO: freq  mo date       time call          sent_nr sent_qth call          recv_nr recv_qth
-
 import datetime
-import logging
 from pathlib import Path
 
 from not1mm.lib.plugin_common import gen_adif, get_points
 from not1mm.lib.version import __version__
-
-logger = logging.getLogger(__name__)
-
-ALTEREGO = None
 
 name = "California QSO Party"
 mode = "BOTH"  # CW SSB BOTH RTTY
@@ -179,45 +146,6 @@ CA_MULTS = {
 dupe_type = 3
 
 
-def is_valid_ca_county(text: str) -> bool:
-    """Return True if text is a valid 4-letter California county abbreviation."""
-
-    return text.upper().strip() in CA_COUNTIES
-
-
-def is_valid_state_province(text: str) -> bool:
-    """Return True if text is a valid 2-letter US state or Canadian province abbreviation."""
-
-    return text.upper().strip() in CA_MULTS
-
-
-def is_valid_exchange(text: str) -> bool:
-    """Return True if text is a valid exchange (county or state/province)."""
-
-    upper = text.upper().strip()
-    return upper in CA_COUNTIES or upper in CA_MULTS or upper == "DX"
-
-
-def normalize_exchange(text: str) -> str:
-    """Return the normalized (uppercased, stripped) exchange text."""
-
-    return text.upper().strip()
-
-
-def points_for_qso(mode: str, is_dupe: bool) -> int:
-    """Return QSO points. 3 points for both Phone and CW. 0 for dupes."""
-
-    if is_dupe:
-        return 0
-    return 3
-
-
-def points(self):
-    """Calc point - 3 points per QSO for both Phone and CW"""
-
-    return points_for_qso(self.contact.get("Mode", ""), self.contact_is_dupe > 0)
-
-
 def show_mults(self):
     """Return display string for mults"""
     # CA stations: states/provinces (capped at 58)
@@ -228,12 +156,11 @@ def show_mults(self):
     sql = (
         "select count(DISTINCT Exchange1) as mult_count "
         "from dxlog where "
-        f"ContestNR = {self.database.current_contest} "
+        f"ContestName = '{self.database.current_contest}' "
         "and typeof(Exchange1) = 'text' "
         "and Exchange1 != 'DX';"
     )
     result = self.database.exec_sql(sql)
-
     if result:
         dx = result.get("mult_count", 0)
 
@@ -268,7 +195,7 @@ def recalculate_mults(self):
         query = (
             f"select count(*) as exch_count from dxlog where TS < '{time_stamp}' "
             f"and Exchange1 = '{exch.upper()}' "
-            f"and ContestNR = {self.pref.get('contest', '1')};"
+            f"and ContestName = '{self.database.current_contest}';"
         )
         result = self.database.exec_sql(query)
         count = int(result.get("exch_count", 0))
@@ -298,9 +225,6 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file."""
-    logger.debug("******Cabrillo*****")
-    logger.debug("Station: %s", f"{self.station}")
-    logger.debug("Contest: %s", f"{self.contest_settings}")
     now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
@@ -308,7 +232,7 @@ def cabrillo(self, file_encoding):
         + "/"
         + f"{self.station.get('Call', '').upper().replace('/', '-')}_{cabrillo_name}_{date_time}.log"
     )
-    logger.debug("%s", filename)
+    self.log_info(f"{filename}")
     log = self.database.fetch_all_contacts_asc()
     try:
         with open(filename, "w", encoding=file_encoding, newline="") as file_descriptor:
@@ -499,10 +423,9 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-        self.show_message_box(f"Cabrillo saved to: {filename}")
+        self.log_info(f"Cabrillo saved to: {filename}")
     except OSError as exception:
-        logger.critical("cabrillo: IO error: %s, writing to %s", exception, filename)
-        self.show_message_box(f"Error saving Cabrillo: {exception} {filename}")
+        self.log_info("cabrillo: IO error: %s, writing to %s", exception, filename)
         return
 
 
