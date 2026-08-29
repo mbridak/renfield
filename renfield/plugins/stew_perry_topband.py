@@ -8,7 +8,7 @@ try:
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.plugin_common import gen_adif, get_points
+    from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
 assert online_score_xml
