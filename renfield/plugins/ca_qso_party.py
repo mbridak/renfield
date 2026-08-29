@@ -1,8 +1,12 @@
 import datetime
 from pathlib import Path
 
-from not1mm.lib.plugin_common import gen_adif, get_points
-from not1mm.lib.version import __version__
+try:
+    from lib.plugin_common import gen_adif, get_points
+    from lib.version import __version__
+except (ImportError, ModuleNotFoundError):
+    from renfield.lib.plugin_common import gen_adif, get_points
+    from renfield.lib.version import __version__
 
 name = "California QSO Party"
 mode = "BOTH"  # CW SSB BOTH RTTY
