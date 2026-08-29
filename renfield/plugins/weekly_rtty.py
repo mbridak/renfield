@@ -12,7 +12,9 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.plugin_common import gen_adif
     from renfield.lib.version import __version__
 
-assert get_logged_band, get_points, online_score_xml
+assert get_logged_band
+assert get_points
+assert online_score_xml
 
 name = "WEEKLY RTTY TEST"
 cabrillo_name = "WRT"
