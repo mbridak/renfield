@@ -603,9 +603,11 @@ class Application(App):
             self.active_contest = json_data.get("ContestName", "")
             try:
                 self.contest = doimp(json_data.get("ContestName"))
-            except Exception:
+            except Exception as what_happened:
                 print(f"No plugin found for {self.active_contest}")
-                self.log_info(f"No plugin found for {self.active_contest}")
+                self.log_info(
+                    f"No plugin found for {self.active_contest} {what_happened}"
+                )
                 return
             self.database.current_contest = self.contest.cabrillo_name
             self.station = json_data.get("Station", {})
