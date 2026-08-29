@@ -15,6 +15,8 @@ except (ImportError, ModuleNotFoundError):
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
+assert get_logged_band, online_score_xml
+
 ukei_pfx = [
     "G",
     "GD",
@@ -34,102 +36,102 @@ mode = "BOTH"  # CW SSB BOTH RTTY
 dupe_type = 2
 
 
-def points(self):
-    """Calc point"""
+# def points(self):
+#     """Calc point"""
 
-    # UK/EI stations contacting :
-    # UK/EI/Europe 80m, 40m - 4 points 20m, 15m, 10m - 2 points
-    # DX (Outside Europe) 80m, 40m - 8 points 20m, 15m, 10m - 4 points
+#     # UK/EI stations contacting :
+#     # UK/EI/Europe 80m, 40m - 4 points 20m, 15m, 10m - 2 points
+#     # DX (Outside Europe) 80m, 40m - 8 points 20m, 15m, 10m - 4 points
 
-    # Note : For UK/EI stations only, all QSOs will score double points between the hours of 0100z and 0459z.
+#     # Note : For UK/EI stations only, all QSOs will score double points between the hours of 0100z and 0459z.
 
-    # European stations contacting :
-    # UK/EI 80m, 40m - 4 points 20m, 15m, 10m - 2 points
-    # Europe 80m, 40m - 2 points 20m, 15m, 10m - 1 points
-    # DX (Outside Europe) 80m, 40m - 4 points 20m, 15m, 10m - 2 points
+#     # European stations contacting :
+#     # UK/EI 80m, 40m - 4 points 20m, 15m, 10m - 2 points
+#     # Europe 80m, 40m - 2 points 20m, 15m, 10m - 1 points
+#     # DX (Outside Europe) 80m, 40m - 4 points 20m, 15m, 10m - 2 points
 
-    # DX (Outside Europe) contacting :
-    # UK/EI 80m, 40m - 8 points 20m, 15m, 10m - 4 points
-    # Europe 80m, 40m - 4 points 20m, 15m, 10m - 2 points
-    # DX (Outside Europe) 80m, 40m - 2 points 20m, 15m, 10m - 1 points
+#     # DX (Outside Europe) contacting :
+#     # UK/EI 80m, 40m - 8 points 20m, 15m, 10m - 4 points
+#     # Europe 80m, 40m - 4 points 20m, 15m, 10m - 2 points
+#     # DX (Outside Europe) 80m, 40m - 2 points 20m, 15m, 10m - 1 points
 
-    # f"{primary_pfx}: {continent}/{entity} cq:{cq} itu:{itu}"
+#     # f"{primary_pfx}: {continent}/{entity} cq:{cq} itu:{itu}"
 
-    if self.contact_is_dupe > 0:
-        return 0
+#     if self.contact_is_dupe > 0:
+#         return 0
 
-    myprimary_pfx = ""
-    mycontinent = ""
-    hisprimary_pfx = ""
-    hiscontinent = ""
+#     myprimary_pfx = ""
+#     mycontinent = ""
+#     hisprimary_pfx = ""
+#     hiscontinent = ""
 
-    result = self.cty_lookup(self.station.get("Call", ""))
-    if result:
-        for item in result.items():
-            myprimary_pfx = item[1].get("primary_pfx", "")
-            mycontinent = item[1].get("continent", "")
+#     result = self.cty_lookup(self.station.get("Call", ""))
+#     if result:
+#         for item in result.items():
+#             myprimary_pfx = item[1].get("primary_pfx", "")
+#             mycontinent = item[1].get("continent", "")
 
-    result = self.cty_lookup(self.contact.get("Call", ""))
-    if result:
-        for item in result.items():
-            hisprimary_pfx = item[1].get("primary_pfx", "")
-            hiscontinent = item[1].get("continent", "")
+#     result = self.cty_lookup(self.contact.get("Call", ""))
+#     if result:
+#         for item in result.items():
+#             hisprimary_pfx = item[1].get("primary_pfx", "")
+#             hiscontinent = item[1].get("continent", "")
 
-    st = 100
-    et = 459
-    zt = datetime.datetime.now(datetime.timezone.utc).isoformat(" ")[11:16]
-    ct = int(zt[0:2]) * 100 + int(zt[3:5])
-    double_window = st <= ct <= et
+#     st = 100
+#     et = 459
+#     zt = datetime.datetime.now(datetime.UTC).isoformat(" ")[11:16]
+#     ct = int(zt[0:2]) * 100 + int(zt[3:5])
+#     double_window = st <= ct <= et
 
-    # UK/EI stations:
-    if myprimary_pfx in ukei_pfx:
-        if hiscontinent == "EU":
-            if self.contact.get("Band", 0) in ["3.5", "7"]:
-                return 4 + (4 * double_window)
-            return 2 + (2 * double_window)
-        if self.contact.get("Band", 0) in ["3.5", "7"]:
-            return 8 + (8 * double_window)
-        return 4 + (4 * double_window)
+#     # UK/EI stations:
+#     if myprimary_pfx in ukei_pfx:
+#         if hiscontinent == "EU":
+#             if self.contact.get("Band", 0) in ["3.5", "7"]:
+#                 return 4 + (4 * double_window)
+#             return 2 + (2 * double_window)
+#         if self.contact.get("Band", 0) in ["3.5", "7"]:
+#             return 8 + (8 * double_window)
+#         return 4 + (4 * double_window)
 
-    # European stations:
-    if mycontinent == "EU":
-        if hisprimary_pfx in ukei_pfx:
-            if self.contact.get("Band", 0) in ["3.5", "7"]:
-                return 4
-            return 2
-        elif hiscontinent == "EU":
-            if self.contact.get("Band", 0) in ["3.5", "7"]:
-                return 2
-            return 1
-        if self.contact.get("Band", 0) in ["3.5", "7"]:
-            return 4
-        return 2
+#     # European stations:
+#     if mycontinent == "EU":
+#         if hisprimary_pfx in ukei_pfx:
+#             if self.contact.get("Band", 0) in ["3.5", "7"]:
+#                 return 4
+#             return 2
+#         elif hiscontinent == "EU":
+#             if self.contact.get("Band", 0) in ["3.5", "7"]:
+#                 return 2
+#             return 1
+#         if self.contact.get("Band", 0) in ["3.5", "7"]:
+#             return 4
+#         return 2
 
-    # DX (Outside Europe)
-    if mycontinent != "EU":
-        if hisprimary_pfx in ukei_pfx:
-            if self.contact.get("Band", "") in ["3.5", "7"]:
-                return 8
-            return 4
-        elif hiscontinent == "EU":
-            if self.contact.get("Band", "") in ["3.5", "7"]:
-                return 4
-            return 2
-        if self.contact.get("Band", "") in ["3.5", "7"]:
-            return 2
-        return 1
+#     # DX (Outside Europe)
+#     if mycontinent != "EU":
+#         if hisprimary_pfx in ukei_pfx:
+#             if self.contact.get("Band", "") in ["3.5", "7"]:
+#                 return 8
+#             return 4
+#         elif hiscontinent == "EU":
+#             if self.contact.get("Band", "") in ["3.5", "7"]:
+#                 return 4
+#             return 2
+#         if self.contact.get("Band", "") in ["3.5", "7"]:
+#             return 2
+#         return 1
 
-    return 0
+#     return 0
 
 
 def show_mults(self):
     """Return display string for mults"""
 
-    query = f"SELECT COUNT(DISTINCT CountryPrefix) as dxcc_count FROM DXLOG WHERE CountryPrefix NOT IN ('EI', 'G', 'GD', 'GI', 'GJ', 'GM', 'GU', 'GW') and ContestNR = {self.pref.get('contest', '1')};"
+    query = f"SELECT COUNT(DISTINCT CountryPrefix) as dxcc_count FROM DXLOG WHERE CountryPrefix NOT IN ('EI', 'G', 'GD', 'GI', 'GJ', 'GM', 'GU', 'GW') and ContestName = '{self.database.current_contest}';"
     result = self.database.exec_sql(query)
     dxcc_count = result.get("dxcc_count", 0)
 
-    query = f"SELECT COUNT(DISTINCT SUBSTR(NR, LENGTH(NR) - 1)) as code_count FROM DXLOG WHERE ContestNR = {self.pref.get('contest', '1')}  and typeof(NR) = 'text';"
+    query = f"SELECT COUNT(DISTINCT SUBSTR(NR, LENGTH(NR) - 1)) as code_count FROM DXLOG WHERE ContestName = '{self.database.current_contest}'  and typeof(NR) = 'text';"
     result = self.database.exec_sql(query)
     code_count = result.get("code_count", 0)
 
@@ -163,7 +165,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -173,7 +174,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -210,7 +211,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -222,19 +223,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -249,26 +250,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -285,7 +286,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -373,7 +374,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log: {ioerror}")
         return
 
@@ -383,12 +384,9 @@ def recalculate_mults(self):
 
 
 def get_mults(self):
-    """"""
-
-    mults = {}
-    return mults
+    # mults = {}
+    return self.show_mults()
 
 
 def just_points(self):
-    """"""
     return get_points(self)
