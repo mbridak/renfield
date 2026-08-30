@@ -12,10 +12,12 @@ from time import gmtime, strftime
 try:
     from renfield.lib import fsutils
     from renfield.lib.database import DataBase
+    from renfield.lib.ham_utility import mhz_to_band
     from renfield.lib.version import __version__
 except (ImportError, ModuleNotFoundError):
     from lib import fsutils
     from lib.database import DataBase
+    from lib.ham_utility import mhz_to_band
     from lib.version import __version__
 
 from rich.text import Text
@@ -455,11 +457,15 @@ class Application(App):
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
             self.update_contacts_window()
+            self.log_info(f'{json_data.get("Band", "0.0")=}')
+            the_band = mhz_to_band(float(json_data.get("Band", "0.0")))
+            self.log_info(f"{the_band=}")
             self.operators_seen[json_data.get("Operator", "Unknown")] = [
                 json_data.get("NetBiosName", "Unknown"),
-                json_data.get("Band", "Unknown"),
+                the_band,
                 json_data.get("Mode", "Unknown"),
             ]
+
             self.update_operators_window()
             self.update_scoring_window()
             return
