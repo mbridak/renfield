@@ -1,6 +1,14 @@
 # Changelog
 
-- [2026-08-28] @mbridak Refactor: remove unused functions and logging, update contest query parameters
+- [2026-08-29] @mbridak Refactor contest plugins
+  - @mbridak Fix: mults in spdx, linter stuff.
+  - @mbridak Add Dutch PACC plugin.
+  - @mbridak fixed library imports in cqp.
+  - @mbridak added more detail to plugin error message.
+- [2026-08-28] @mbridak corrected DB access and linter stuff.
+  - @mbridak mostly linter fixes.
+  - @mbridak improved SQL query
+  - @mbridak Refactor: remove unused functions and logging, update contest query parameters
 - [2026-08-27] @mbridak add CQP
 - [2026-07-20] @mbridak Fix: formatting issues in Cabrillo output and add missing assertions
   - @mbridak Removed unused function.
@@ -48,5 +56,3 @@
   - Refactor database methods for clarity and error handling
   - @mbridak Add function to return next SN.
   - @mbridak Add a table for serial number tracking.
-- [2025-09-25] more
-  - Add issue templates for bug reports and feature requests

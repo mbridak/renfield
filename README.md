@@ -10,7 +10,15 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
-- [2026-08-28] @mbridak Refactor: remove unused functions and logging, update contest query parameters
+- [2026-08-29] @mbridak Refactor contest plugins
+  - @mbridak Fix: mults in spdx, linter stuff.
+  - @mbridak Add Dutch PACC plugin.
+  - @mbridak fixed library imports in cqp.
+  - @mbridak added more detail to plugin error message.
+- [2026-08-28] @mbridak corrected DB access and linter stuff.
+  - @mbridak mostly linter fixes.
+  - @mbridak improved SQL query
+  - @mbridak Refactor: remove unused functions and logging, update contest query parameters
 - [2026-08-27] @mbridak add CQP
 - [2026-07-20] @mbridak Fix: formatting issues in Cabrillo output and add missing assertions
   - @mbridak Removed unused function.
