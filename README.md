@@ -79,7 +79,7 @@ You can run renfield and have it's interface displayed directly in the terminal 
 # renfield
 ```
 
-![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/pic/renfield_cli.svg)
+![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/pic/renfield_cli.png)
 
 ### Run as a web server
 
