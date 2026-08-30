@@ -3,17 +3,16 @@
 
 # pylint: disable=global-statement, raise-missing-from
 
+import argparse
+import datetime
+import queue
 import random
 import socket
-import uuid
-import time
 import threading
-import queue
-import argparse
+import time
+import uuid
+from json import JSONDecodeError, dumps, loads
 from random import randint
-import datetime
-from json import dumps, loads, JSONDecodeError
-
 
 parser = argparse.ArgumentParser(description="Simulate a Field Day participant.")
 parser.add_argument("-c", "--call", type=str, help="Your Callsign")
@@ -24,7 +23,7 @@ parser.add_argument("-p", "--power", type=str, help="Your Power")
 args = parser.parse_args()
 
 MULTICAST_PORT = 2239
-MULTICAST_GROUP = "224.1.1.1"
+MULTICAST_GROUP = "239.1.1.1"
 INTERFACE_IP = "0.0.0.0"
 GROUP_CALL = None
 
@@ -215,9 +214,7 @@ def log_contact():
     if MODE == "SSB":
         points = 1
     contact = {
-        "TS": datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
+        "TS": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S"),
         "Call": callsign,
         "Freq": float(fakefreq(BAND, MODE)),
         "QSXFreq": float(fakefreq(BAND, MODE)),
@@ -288,7 +285,7 @@ def watch_udp():
     while True:
         try:
             datagram = s.recv(1500)
-        except socket.timeout:
+        except TimeoutError:
             time.sleep(1)
             continue
         if datagram:
@@ -314,15 +311,17 @@ def check_udp_queue():
         if json_data.get("cmd") == "PING":
             pass
             # print(f"[{strftime('%H:%M:%S', gmtime())}] {json_data}")
-        if json_data.get("cmd") == "RESPONSE":
-            if json_data.get("recipient") == STATION_CALL:
-                if json_data.get("subject") == "HOSTINFO":
-                    GROUP_CALL = str(json_data.get("groupcall"))
-                    return
-                if json_data.get("subject") == "LOG":
-                    print("Server Generated Log.")
+        if (
+            json_data.get("cmd") == "RESPONSE"
+            and json_data.get("recipient") == STATION_CALL
+        ):
+            if json_data.get("subject") == "HOSTINFO":
+                GROUP_CALL = str(json_data.get("groupcall"))
+                return
+            if json_data.get("subject") == "LOG":
+                print("Server Generated Log.")
 
-                remove_confirmed_commands(json_data)
+            remove_confirmed_commands(json_data)
 
         if json_data.get("cmd") == "CONFLICT":
             band, mode = json_data.get("bandmode").split()
@@ -332,9 +331,8 @@ def check_udp_queue():
                 and json_data.get("recipient") == STATION_CALL
             ):
                 print(f"CONFLICT ON {json_data.get('bandmode')}")
-        if json_data.get("cmd") == "GROUPQUERY":
-            if GROUP_CALL:
-                send_status_udp()
+        if json_data.get("cmd") == "GROUPQUERY" and GROUP_CALL:
+            send_status_udp()
 
 
 def send_chat():
@@ -385,6 +383,7 @@ def send_status_udp():
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 s.bind(("", MULTICAST_PORT))
 mreq = socket.inet_aton(MULTICAST_GROUP) + socket.inet_aton(INTERFACE_IP)
 s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, bytes(mreq))
