@@ -10,6 +10,10 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
+- [2026-08-30] @mbridak fix operator info window band display.
+  - @mbridak Add mhz_to_band function to convert MHz to band name
+  - Refactor ham_utility.py: reorganize imports, enhance suffix handling, and introduce Ba...
+  - @mbridak updated multicast listener and simulator: update multicast group address, and...
 - [2026-08-29] @mbridak Refactor contest plugins
   - @mbridak Fix: mults in spdx, linter stuff.
   - @mbridak Add Dutch PACC plugin.
