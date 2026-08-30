@@ -210,6 +210,15 @@ def get_not1mm_band(band: str) -> float:
     return b.band_mhz if b else 0.0
 
 
+def mhz_to_band(band: float) -> str:
+    """Convert band_mhz into band name  (canonical DXLOG value).
+
+    Returns 0.0 if the band is unknown.
+    """
+    b = _BY_BAND_MHZ.get(band)
+    return b.name if b else 0.0
+
+
 def fakefreq(band_name: str, mode: str) -> str:
     """Return a sensible kHz-as-string frequency for cabrillo/ADIF when the rig is offline.
 
