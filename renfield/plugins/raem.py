@@ -1,60 +1,15 @@
-"""Ernst Krenkel Memorial"""
-
-# pylint: disable=invalid-name, c-extension-no-member, unused-import
-
-
-# RAEM Contest
-#  	Status:	Active
-#  	Geographic Focus:	Worldwide
-#  	Participation:	Worldwide
-#  	Mode:	    CW
-#  	Bands:	    80, 40, 20, 15, 10m
-#  	Classes:	Single Op All Band (Low/High)
-#               Single Op Single Band
-#               Multi-Single
-#  	Max power:	HP: >100 watts
-#               LP: 100 watts
-#  	Exchange:	Serial No. + latitude (degs only) + hemisphere + longitude (degs only) + hemisphere (see rules)
-#               N=North, S=South, W=West, O=East (e.g. 57N 85O)
-#  	Work stations:	Once per band
-#  	QSO Points:	50 points + 1 point for every degree difference in geo location, both latitude and longitude
-#               QSO with Polar station: 100 points additional
-#               QSO with RAEM Memorial Station: 300 points additional
-#  	Multipliers:	Polar stations multiply total QSO points by 1.1
-#  	Score Calculation:	Total score = total QSO points
-#  	E-mail logs to:	raem[at]srr[dot]ru
-#  	Upload log at:	http://ua9qcq.com/
-#  	Mail logs to:	(none)
-#  	Find rules at:	https://raem.srr.ru/rules/
-#  	Cabrillo name:	RAEM
-
-# Label and field names
-# callsign_label, callsign
-# snt_label, sent
-# rcv_label, receive
-# other_label, other_1
-# exch_label, other_2
-
-# command button names
-# esc_stop
-# log_it
-# mark
-# spot_it
-# wipe
-
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "RAEM"
 cabrillo_name = "RAEM"
@@ -64,83 +19,83 @@ mode = "CW"  # CW SSB BOTH RTTY
 dupe_type = 2
 
 
-def latlondif(self, exchange1: str):
-    """"""
-    ourexchange = self.contest_settings.get("SentExchange", None)
-    if ourexchange is None:
-        return 0, False
-    ourexchange = ourexchange.upper()
-    if len(exchange1) < 4:
-        return 0, False
-    exchange1 = exchange1.upper()
+# def latlondif(self, exchange1: str):
+#     """"""
+#     ourexchange = self.contest_settings.get("SentExchange", None)
+#     if ourexchange is None:
+#         return 0, False
+#     ourexchange = ourexchange.upper()
+#     if len(exchange1) < 4:
+#         return 0, False
+#     exchange1 = exchange1.upper()
 
-    latindex = None
-    ourlat = None
-    ourlon = None
-    if "N" in ourexchange:
-        latindex = ourexchange.index("N")
-        lat = ourexchange[:latindex]
-        if lat.isnumeric():
-            ourlat = int(lat)
-    if "S" in ourexchange:
-        latindex = ourexchange.index("S")
-        lat = ourexchange[:latindex]
-        if lat.isnumeric():
-            ourlat = int(lat)
-    if "W" in ourexchange:
-        lon = ourexchange[latindex + 1 : ourexchange.index("W")]
-        if lon.isnumeric():
-            ourlon = int(lon)
-    if "O" in ourexchange:
-        lon = ourexchange[latindex + 1 : ourexchange.index("O")]
-        if lon.isnumeric():
-            ourlon = int(lon)
-    if ourlat is None or ourlon is None:
-        return 0, False
+#     latindex = None
+#     ourlat = None
+#     ourlon = None
+#     if "N" in ourexchange:
+#         latindex = ourexchange.index("N")
+#         lat = ourexchange[:latindex]
+#         if lat.isnumeric():
+#             ourlat = int(lat)
+#     if "S" in ourexchange:
+#         latindex = ourexchange.index("S")
+#         lat = ourexchange[:latindex]
+#         if lat.isnumeric():
+#             ourlat = int(lat)
+#     if "W" in ourexchange:
+#         lon = ourexchange[latindex + 1 : ourexchange.index("W")]
+#         if lon.isnumeric():
+#             ourlon = int(lon)
+#     if "O" in ourexchange:
+#         lon = ourexchange[latindex + 1 : ourexchange.index("O")]
+#         if lon.isnumeric():
+#             ourlon = int(lon)
+#     if ourlat is None or ourlon is None:
+#         return 0, False
 
-    hislat = None
-    hislon = None
-    if "N" in exchange1:
-        latindex = exchange1.index("N")
-        lat = exchange1[:latindex]
-        if lat.isnumeric():
-            hislat = int(lat)
-    if "S" in exchange1:
-        latindex = exchange1.index("S")
-        lat = exchange1[:latindex]
-        if lat.isnumeric():
-            hislat = int(lat)
-    if "W" in exchange1:
-        lon = exchange1[latindex + 1 : exchange1.index("W")]
-        if lon.isnumeric():
-            hislon = int(lon)
-    if "O" in exchange1:
-        lon = exchange1[latindex + 1 : exchange1.index("O")]
-        if lon.isnumeric():
-            hislon = int(lon)
-    if hislat is None or hislon is None:
-        return 0, False
+#     hislat = None
+#     hislon = None
+#     if "N" in exchange1:
+#         latindex = exchange1.index("N")
+#         lat = exchange1[:latindex]
+#         if lat.isnumeric():
+#             hislat = int(lat)
+#     if "S" in exchange1:
+#         latindex = exchange1.index("S")
+#         lat = exchange1[:latindex]
+#         if lat.isnumeric():
+#             hislat = int(lat)
+#     if "W" in exchange1:
+#         lon = exchange1[latindex + 1 : exchange1.index("W")]
+#         if lon.isnumeric():
+#             hislon = int(lon)
+#     if "O" in exchange1:
+#         lon = exchange1[latindex + 1 : exchange1.index("O")]
+#         if lon.isnumeric():
+#             hislon = int(lon)
+#     if hislat is None or hislon is None:
+#         return 0, False
 
-    return abs(ourlat - hislat) + abs(ourlon - hislon), hislat >= 66
+#     return abs(ourlat - hislat) + abs(ourlon - hislon), hislat >= 66
 
 
-def points(self):
-    """Calc point"""
-    # 50 points + 1 point for every degree difference in geo location, both latitude and longitude
-    # QSO with Polar station: 100 points additional
-    # QSO with RAEM Memorial Station: 300 points additional
+# def points(self):
+#     """Calc point"""
+#     # 50 points + 1 point for every degree difference in geo location, both latitude and longitude
+#     # QSO with Polar station: 100 points additional
+#     # QSO with RAEM Memorial Station: 300 points additional
 
-    if self.contact_is_dupe > 0:
-        return 0
-    points = 50
-    morepoints, ispolar = latlondif(self, self.other_2.text())
-    points += morepoints
-    if ispolar is not False:
-        points += 100
-    if self.callsign.text() == "RAEM":
-        points += 300
+#     if self.contact_is_dupe > 0:
+#         return 0
+#     points = 50
+#     morepoints, ispolar = latlondif(self, self.other_2.text())
+#     points += morepoints
+#     if ispolar is not False:
+#         points += 100
+#     if self.callsign.text() == "RAEM":
+#         points += 300
 
-    return points
+#     return points
 
 
 def show_mults(self):
@@ -163,9 +118,8 @@ def show_mults(self):
         if lat.isnumeric():
             ourlat = int(lat)
 
-    if ourlat is not None:
-        if ourlat >= 66:
-            return 1.1
+    if ourlat is not None and ourlat >= 66:
+        return 1.1
 
     return 1
 
@@ -197,7 +151,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -207,7 +160,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -244,7 +197,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -256,19 +209,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -283,26 +236,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -319,7 +272,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -392,7 +345,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log: {ioerror}")
         return
 

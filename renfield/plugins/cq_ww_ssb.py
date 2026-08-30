@@ -1,54 +1,15 @@
-"""CQ World Wide DX SSB plugin"""
-
-# CQ Worldwide DX Contest, SSB
-# Status:	        Active
-# Geographic Focus:	Worldwide
-# Participation:	Worldwide
-# Awards:	        Worldwide
-# Mode:	            SSB
-# Bands:	        160, 80, 40, 20, 15, 10m
-# Classes:	        Single Op All Band (QRP/Low/High)
-#                   Single Op Single Band (QRP/Low/High)
-#                   Single Op Assisted All Band (QRP/Low/High)
-#                   Single Op Assisted Single Band (QRP/Low/High)
-#                   Single Op Overlays: (Classic/Rookie/Youth)
-#                   Multi-Single (Low/High)
-#                   Multi-Two
-#                   Multi-Multi
-#                   Explorer
-# Max power:	    HP: 1500 watts
-#                   LP: 100 watts
-#                   QRP: 5 watts
-# Exchange:	        RS + CQ Zone No.
-# Work stations:	Once per band
-# QSO Points:	    0 points per QSO with same country (counts as mult)
-#                   1 point per QSO with different country same continent
-#                   2 points per QSO with different country same continent (NA)
-#                   3 points per QSO with different continent
-# Multipliers:	    Each CQ zone once per band
-#                   Each country once per band
-# Score Calculation:	Total score = total QSO points x total mults
-# E-mail logs to:	(none)
-# Upload log at:	https://www.cqww.com/logcheck/
-# Mail logs to:	    (none)
-# Find rules at:	https://www.cqww.com/rules.htm
-# Cabrillo name:	CQ-WW-SSB
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
+assert online_score_xml
 name = "CQ WW SSB"
 cabrillo_name = "CQ-WW-SSB"
 mode = "SSB"  # CW SSB BOTH RTTY
@@ -57,38 +18,38 @@ mode = "SSB"  # CW SSB BOTH RTTY
 dupe_type = 2
 
 
-def points(self):
-    """Calc point"""
+# def points(self):
+#     """Calc point"""
 
-    if self.contact_is_dupe > 0:
-        return 0
+#     if self.contact_is_dupe > 0:
+#         return 0
 
-    result = self.cty_lookup(self.station.get("Call", ""))
-    if result:
-        for item in result.items():
-            mycountry = item[1].get("entity", "")
-            mycontinent = item[1].get("continent", "")
-    result = self.cty_lookup(self.contact.get("Call", ""))
-    if result:
-        for item in result.items():
-            entity = item[1].get("entity", "")
-            continent = item[1].get("continent", "")
+#     result = self.cty_lookup(self.station.get("Call", ""))
+#     if result:
+#         for item in result.items():
+#             mycountry = item[1].get("entity", "")
+#             mycontinent = item[1].get("continent", "")
+#     result = self.cty_lookup(self.contact.get("Call", ""))
+#     if result:
+#         for item in result.items():
+#             entity = item[1].get("entity", "")
+#             continent = item[1].get("continent", "")
 
-            # Contacts between stations on different continents count three (3) points.
-            if mycontinent != continent:
-                return 3
+#             # Contacts between stations on different continents count three (3) points.
+#             if mycontinent != continent:
+#                 return 3
 
-            # Exception: Contacts between stations in different countries within the North American boundaries count two (2) points.
-            if (mycontinent == "NA" and continent == "NA") and mycountry != entity:
-                return 2
+#             # Exception: Contacts between stations in different countries within the North American boundaries count two (2) points.
+#             if (mycontinent == "NA" and continent == "NA") and mycountry != entity:
+#                 return 2
 
-            # Contacts between stations on the same continent but in different countries count one (1) point.
-            if mycountry.upper() != entity.upper():
-                return 1
+#             # Contacts between stations on the same continent but in different countries count one (1) point.
+#             if mycountry.upper() != entity.upper():
+#                 return 1
 
-            # Contacts between stations in the same country have zero (0) QSO point value, but count for zone and country multiplier credit.
+#             # Contacts between stations in the same country have zero (0) QSO point value, but count for zone and country multiplier credit.
 
-    return 0
+#     return 0
 
 
 def show_mults(self, rtc=None):
@@ -133,7 +94,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -144,7 +104,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -181,7 +141,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -193,19 +153,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -220,26 +180,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -256,7 +216,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -329,7 +289,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving log: {ioerror}")
         return
 

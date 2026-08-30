@@ -1,49 +1,15 @@
-"""
-Helvetica
--------------------------------------------------
-Status:	Active
-Geographic Focus:	Switzerland
-Participation:	Worldwide
-Mode:	CW, SSB, Digital
-Bands:	160, 80, 40, 20, 15, 10m
-Classes:	Single Op (CW/SSB) High
-            Single Op Mixed (QRP/Low/High)
-            Multi-Op (CW/SSB/Mixed) High
-            SWL
-Max operating hours:	18 with a maximum of two rest periods of any length
-Max power:	HP: >100 watts
-LP: 100 watts
-QRP: 5 watts (CW/Digital) or 10 watts (SSB)
-Exchange:	HB: RS(T) + 2-letter canton
-            non-HB: RS(T) + Serial No.
-Work stations:	Once per band per mode
-
-Scoring:
-Contact with a station in Switzerland: 10 points
-Contact with a station within the same continent: 1 point
-Contact with a station outside the operator’s continent: 3 points
-
-Multipliers: Canton and DXCC country (including Switzerland) per band: 1 point
-
-Score Calculation:	Total score = total QSO points x total mults
-E-mail logs to:	contest[at]uska[dot]ch
-Mail logs to:	(none)
-Find rules at:	https://www.uska.ch/events/uska-helvetia-contest-concours-helvetia-hf/
-Cabrillo name:	HELVETIA
-"""
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml()
 
 name = "HELVETIA"
 cabrillo_name = "HELVETIA"
@@ -153,7 +119,6 @@ def recalculate_mults(self):
 
     all_contacts = self.database.fetch_all_contacts_asc()
     for contact in all_contacts:
-
         contact["IsMultiplier1"] = 0
         contact["IsMultiplier2"] = 0
 
@@ -166,7 +131,7 @@ def recalculate_mults(self):
                 f"select count(*) as canton_count from dxlog where  TS < '{time_stamp}' "
                 f"and NR = '{canton.upper()}' "
                 f"and Band = '{band}' "
-                f"and ContestNR = {self.pref.get('contest', '1')};"
+                f"and ContestName = '{self.database.current_contest}';"
             )
             result = self.database.exec_sql(query)
             count = int(result.get("canton_count", 0))
@@ -178,7 +143,7 @@ def recalculate_mults(self):
                 f"select count(*) as dxcc_count from dxlog where TS < '{time_stamp}' "
                 f"and CountryPrefix = '{dxcc}' "
                 f"and Band = '{band}' "
-                f"and ContestNR = {self.pref.get('contest', '1')};"
+                f"and ContestName = '{self.database.current_contest}';"
             )
             result = self.database.exec_sql(query)
             if not result.get("dxcc_count", ""):
@@ -197,7 +162,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -208,7 +172,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -245,7 +209,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -257,19 +221,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -284,26 +248,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -320,7 +284,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -393,7 +357,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log:  {ioerror}")
         return
 

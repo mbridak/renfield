@@ -1,35 +1,14 @@
-"""
-IARU HF World Championship  IARU-HF
-
-Exchange:       IARU HQ: RS(T) + IARU Society
-                Non-HQ: RS(T) + ITU Zone No.
-
-Work stations:  Once per band per mode
-
-QSO Points:     1 point per QSO with same zone or with HQ stations
-                3 points per QSO with different zone on same continent
-                5 points per QSO with different zone on different continent
-
-Multipliers:    Each ITU zone once per band
-                Each IARU HQ and each IARU official once per band
-"""
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
-assert get_logged_band
 assert online_score_xml
 
 name = "IARU HF"
@@ -52,7 +31,7 @@ def show_mults(self, rtc=None):
 
     query = (
         "select count(DISTINCT(ZN || ':' || Band || ':' || Mode)) "
-        "as zbm_count from dxlog where "
+        "as zbm_count from dxlog where ContestName = '{self.database.current_contest}' and "
         "typeof(ZN)!='integer';"
     )
     result = self.database.exec_sql(query)
@@ -87,7 +66,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -98,7 +76,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -283,7 +261,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log:  {ioerror}")
         return
 

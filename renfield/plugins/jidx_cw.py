@@ -1,48 +1,15 @@
-"""CQ WPX CW plugin"""
-
-# pylint: disable=invalid-name, unused-variable, c-extension-no-member
-
-# JIDX CW Contest
-#  	Status:	Active
-#  	Geographic Focus:	Japan
-#  	Participation:	Worldwide
-#  	Mode:	CW
-#  	Bands:	160, 80, 40, 20, 15, 10m
-#  	Classes:	Single Op All Band (Low/High)
-# Single Op Single Band (Low/High)
-# Multi-Single
-# Multi-Two
-# Maritime Mobile
-#  	Max power:	HP: >100W
-# LP: 100W
-#  	Exchange:	JA: RST + Prefecture No.
-# non-JA: RST + CQ Zone No.
-#  	Work stations:	Once per band
-#  	QSO Points:	4 points per JA-DX QSO on 160m
-# 2 points per JA-DX QSO on 80m
-# 1 points per JA-DX QSO on 40, 20, 15m
-# 2 points per JA-DX QSO on 10m
-#  	Multipliers:	JA Stations: DXCC countries and CQ zones once per band
-# non-JA Stations: JA prefectures plus JD1/O, JD1/MT, JD1/OT once per band
-#  	Score Calculation:	Total score = total QSO points x total mults
-#  	E-mail logs to:	cw[at]jidx[dot]org
-#  	Upload log at:	http://www.jidx.org/upload/uplog.html
-#  	Mail logs to:	(none)
-#  	Find rules at:	http://www.jidx.org/jidxrule-e.html
-#  	Cabrillo name:	JIDX-CW
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "JIDX CW"
 cabrillo_name = "JIDX-CW"
@@ -50,24 +17,6 @@ mode = "CW"  # CW SSB BOTH RTTY
 
 # 1 once per contest, 2 work each band, 3 each band/mode, 4 no dupe checking
 dupe_type = 2
-
-
-def points(self):
-    """Calc point"""
-
-    if self.contact_is_dupe > 0:
-        return 0
-
-    pts = {
-        1: 4,
-        3: 2,
-        7: 1,
-        14: 1,
-        21: 1,
-        28: 2,
-    }
-    mhz = int(int(float(self.contact.get("Freq", 0))) / 1000)
-    return pts.get(mhz, 0)
 
 
 def show_mults(self):
@@ -106,7 +55,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -117,7 +65,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -129,7 +77,7 @@ def cabrillo(self, file_encoding):
     if result:
         for item in result.items():
             mycountry = item[1].get("entity", "")
-            mycontinent = item[1].get("continent", "")
+            _mycontinent = item[1].get("continent", "")
     category = ""
     band = self.contest_settings.get("BandCategory", "")
     if self.contest_settings.get("OperatorCategory", "") == "SINGLE-OP":
@@ -182,7 +130,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -204,7 +152,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -268,7 +216,7 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f'SENTNR: {self.contest_settings.get("SentExchange", "")}',
+                f"SENTNR: {self.contest_settings.get('SentExchange', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -295,7 +243,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log: {ioerror}")
         return
 

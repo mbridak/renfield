@@ -29,7 +29,7 @@ def show_mults(self):
 
     sql = (
         "select count(DISTINCT(NR || ':' || Band || ':' || Mode)) as mult_count from dxlog "
-        "where ContestName = '{self.database.current_contest}' and typeof(NR) = 'text';"
+        f"where ContestName = '{self.database.current_contest}' and typeof(NR) = 'text';"
     )
     result = self.database.exec_sql(sql)
     if result:

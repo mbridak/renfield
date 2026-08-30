@@ -2,19 +2,18 @@
 
 # pylint: disable=invalid-name, c-extension-no-member, unused-import
 
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "SAC SSB"
 cabrillo_name = "SAC-SSB"
@@ -69,58 +68,6 @@ scandinavian_prefixes = [
 ]
 
 
-def points(self):
-    """Calc point"""
-    # 7.1 For Scandinavian stations:
-    #   EUROPEAN stations, outside Scandinavia, are worth two (2) points for every complete QSO.
-    #   NON-EUROPEAN stations are worth three (3) points for every complete QSO.
-    # 7.2 For non-Scandinavian stations:
-    #   EUROPEAN stations receive one (1) point for every complete Scandinavian QSO.
-    #   NON-EUROPEAN stations receive one (1) point for every complete Scandinavian QSO on
-    #       14, 21, and 28 MHz and three (3) points for every complete QSO on 3.5 and 7 MHz.
-
-    if self.contact_is_dupe > 0:
-        return 0
-
-    myprimary_pfx = ""
-    mycontinent = ""
-    hisprimary_pfx = ""
-    hiscontinent = ""
-
-    result = self.cty_lookup(self.station.get("Call", ""))
-    if result:
-        for item in result.items():
-            myprimary_pfx = item[1].get("primary_pfx", "")
-            mycontinent = item[1].get("continent", "")
-
-    result = self.cty_lookup(self.contact.get("Call", ""))
-    if result:
-        for item in result.items():
-            hisprimary_pfx = item[1].get("primary_pfx", "")
-            hiscontinent = item[1].get("continent", "")
-
-    if (
-        myprimary_pfx in scandinavian_prefixes
-        and hisprimary_pfx not in scandinavian_prefixes
-    ):
-        if hiscontinent == "EU":
-            return 2
-        return 3
-    if (
-        myprimary_pfx not in scandinavian_prefixes
-        and hisprimary_pfx in scandinavian_prefixes
-    ):
-        if mycontinent == "EU":
-            return 1
-        if self.contact.get("Band", 0) in ["3.5", "7"]:
-            return 3
-        if self.contact.get("Band", 0) in ["14", "21", "28"]:
-            return 1
-
-    # Something wrong
-    return 0
-
-
 def show_mults(self):
     """Return display string for mults"""
     myprimary_pfx = ""
@@ -135,7 +82,7 @@ def show_mults(self):
         result = self.database.fetch_country_band_count()
         mult_count = result.get("cb_count", 0)
     else:
-        query = f"SELECT count(DISTINCT(CountryPrefix || ':' || substr(WPXPrefix,3,1) || ':' || Band)) as mults from DXLOG where ContestNR = {self.pref.get('contest', '1')} AND CountryPrefix IN ('JW', 'JX', 'LA', 'LB', 'LC', 'LG', 'LI', 'LJ' , 'LN', 'OF', 'OG', 'OH', 'OI', 'OFØ', 'OGØ', 'OHØ', 'OJØ', 'OX', 'XP', 'OW', 'OY', '5P', '5Q', 'OU', 'OV', 'OZ', '7S', '8S', 'SA', 'SB', 'SC', 'SD', 'SE', 'SF', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'TF');"
+        query = f"SELECT count(DISTINCT(CountryPrefix || ':' || substr(WPXPrefix,3,1) || ':' || Band)) as mults from DXLOG where ContestName = '{self.database.current_contest}' AND CountryPrefix IN ('JW', 'JX', 'LA', 'LB', 'LC', 'LG', 'LI', 'LJ' , 'LN', 'OF', 'OG', 'OH', 'OI', 'OFØ', 'OGØ', 'OHØ', 'OJØ', 'OX', 'XP', 'OW', 'OY', '5P', '5Q', 'OU', 'OV', 'OZ', '7S', '8S', 'SA', 'SB', 'SC', 'SD', 'SE', 'SF', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'TF');"
         result = self.database.exec_sql(query)
         mult_count = result.get("mults", 0)
     return mult_count
@@ -168,7 +115,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -178,7 +124,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -215,7 +161,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -227,19 +173,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -254,26 +200,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -290,7 +236,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -363,7 +309,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log: {ioerror}")
         return
 

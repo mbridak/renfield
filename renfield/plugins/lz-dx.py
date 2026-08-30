@@ -1,49 +1,15 @@
-"""
-@dg9vh
-LZ-DX
--------------------------------------------------
-Status:	Active
-Geographic Focus:	Bulgaria
-Participation:	Worldwide
-Mode:	CW, SSB
-Bands:	160, 80, 40, 20, 15, 10m
-Classes:	Single Op (CW/SSB) High
-            Single Op Mixed (QRP/Low/High)
-            Multi-Op (CW/SSB/Mixed) High
-            SWL
-Max operating hours:	18 with a maximum of two rest periods of any length
-Max power:	HP: >100 watts
-LP: 100 watts
-QRP: 5 watts (CW/Digital) or 10 watts (SSB)
-Exchange:	LZ: RS(T) + 2-letter district
-            non-HB: RS(T) + ITU zone
-Work stations:	Once per band per mode
-
-Scoring:
-Contact with a station in Bulgaria: 10 points
-Contact with a station within the same continent: 1 point
-Contact with a station outside the operator’s continent: 3 points
-
-Multipliers: District and DXCC country (including Bulgaria) per band: 1 point
-
-Score Calculation:	Total score = total QSO points x total mults
-Mail logs to:	lzdxc@bfra.bg
-Find rules at:	https://lzdx.bfra.bg/rulesen.html
-Cabrillo name:	LZ-DX
-"""
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "LZ DX"
 cabrillo_name = "LZ-DX"
@@ -104,7 +70,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -115,7 +80,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -152,7 +117,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -164,19 +129,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -191,26 +156,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -227,7 +192,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -300,42 +265,9 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log: {ioerror}")
         return
-
-
-def points(self):
-    """
-    Scoring:
-    Contact with a station within the same continent: 1 point
-    Contact with a station outside the operator’s continent: 3 points
-    Contact with a station in Switzerland: 10 points
-    self.contact["CountryPrefix"]
-    self.contact["Continent"]
-    """
-    if self.contact_is_dupe > 0:
-        return 0
-
-    result = self.cty_lookup(self.station.get("Call", ""))
-    if result:
-        for item in result.items():
-            my_continent = item[1].get("continent", "")
-    result = self.cty_lookup(self.contact.get("Call", ""))
-    if result:
-        for item in result.items():
-            their_country = item[1].get("entity", "")
-            their_continent = item[1].get("continent", "")
-
-            if their_country == "Bulgaria":
-                return 10
-
-            if my_continent != their_continent:
-                return 3
-
-            return 1
-    # Something wrong
-    return 0
 
 
 def calc_score(self):
@@ -356,7 +288,6 @@ def recalculate_mults(self):
 
     all_contacts = self.database.fetch_all_contacts_asc()
     for contact in all_contacts:
-
         contact["IsMultiplier1"] = 0
         contact["IsMultiplier2"] = 0
 
@@ -369,7 +300,7 @@ def recalculate_mults(self):
                 f"select count(*) as canton_count from dxlog where  TS < '{time_stamp}' "
                 f"and NR = '{canton.upper()}' "
                 f"and Band = '{band}' "
-                f"and ContestNR = {self.pref.get('contest', '1')};"
+                f"and ContestName = '{self.database.current_contest}';"
             )
             result = self.database.exec_sql(query)
             count = int(result.get("canton_count", 0))
@@ -381,7 +312,7 @@ def recalculate_mults(self):
                 f"select count(*) as dxcc_count from dxlog where TS < '{time_stamp}' "
                 f"and CountryPrefix = '{dxcc}' "
                 f"and Band = '{band}' "
-                f"and ContestNR = {self.pref.get('contest', '1')};"
+                f"and ContestName = '{self.database.current_contest}';"
             )
             result = self.database.exec_sql(query)
             if not result.get("dxcc_count", ""):

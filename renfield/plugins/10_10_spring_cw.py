@@ -3,15 +3,14 @@ from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
 
-assert get_logged_band, online_score_xml
+assert online_score_xml
+
 name = "10 10 SPRING CW"
 cabrillo_name = "10-10"
 mode = "CW"  # CW SSB BOTH RTTY
@@ -259,7 +258,6 @@ def recalculate_mults(self):
 
 
 def get_mults(self):
-
     mults = {}
     return mults
 

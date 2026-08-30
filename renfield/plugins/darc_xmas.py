@@ -1,42 +1,15 @@
-"""DARC XMAS plugin"""
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
-#   DARC Christmas Contest
-#   Status:	Active
-#   Geographic Focus:	Germany
-#   Participation:	Worldwide
-#   Awards:	Worldwide
-#   Mode:	CW, SSB
-#   Bands:	80, 40m
-#   Classes:	Single Op (Low/High)
-#   Max power:	HP: >100 watts
-#   LP: 100 watts
-#   Exchange:	RST + DOK
-#   non-Member (DL): RST + 'NM' or 'no member'
-#   outside DL:   RST + serial number
-#   Work stations:	Once per band and mode
-#   QSO Points:	1 point per QSO
-#   Multipliers:	DOK (DARC/VFDB), 'NM' does not count + each WPX-prefix per band
-#   Score Calculation:	Total score = total QSO points x total mults
-#   Mail logs to:	(none)
-#   Find rules at:	https://www.darc.de/der-club/referate/conteste/weihnachtswettbewerb/regeln/
-#   Upload logs at: https://dxhf2.darc.de/~xmaslog/upload.cgi?form=referat&lang=de
-#   Cabrillo name:	XMAS
-
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "DARC XMAS"
 mode = "BOTH"  # CW SSB BOTH RTTY
@@ -46,13 +19,13 @@ cabrillo_name = "XMAS"
 dupe_type = 3
 
 
-def points(self):
-    """Calc point"""
+# def points(self):
+#     """Calc point"""
 
-    if self.contact_is_dupe > 0:
-        return 0
+#     if self.contact_is_dupe > 0:
+#         return 0
 
-    return 1
+#     return 1
 
 
 def show_mults(self, rtc=None):
@@ -92,7 +65,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -103,7 +75,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -140,7 +112,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -152,19 +124,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -179,26 +151,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -215,7 +187,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -288,7 +260,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving the log:  {ioerror}")
         return
 
@@ -298,7 +270,6 @@ def recalculate_mults(self):
 
     all_contacts = self.database.fetch_all_contacts_asc()
     for contact in all_contacts:
-
         contact["IsMultiplier1"] = 0
         contact["IsMultiplier2"] = 0
 

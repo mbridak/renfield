@@ -1,56 +1,15 @@
-"""CQ WPX CW plugin"""
-
-# pylint: disable=invalid-name, c-extension-no-member, unused-import
-
-# CQ WW WPX Contest, CW
-#  	Status:	Active
-#  	Geographic Focus:	Worldwide
-#  	Participation:	Worldwide
-#  	Awards:	Worldwide
-#  	Mode:	CW
-#  	Bands:	160, 80, 40, 20, 15, 10m
-#  	Classes:	Single Op All Band (QRP/Low/High)
-# Single Op Single Band (QRP/Low/High)
-# Single Op Overlays: (TB-Wires/Rookie/Classic/Youth)
-# Multi-Single (Low/High)
-# Multi-Two
-# Multi-Multi
-# Multi-Distributed
-#  	Max operating hours:	Single Op: 36 hours with offtimes of at least 60 minutes
-# Multi-Op: 48 hours
-#  	Max power:	HP: 1500 watts
-# LP: 100 watts
-# QRP: 5 watts
-#  	Exchange:	RST + Serial No.
-#  	Work stations:	Once per band
-#  	QSO Points:	All: 6 points per 160/80/40m QSO with different continent
-# All: 3 points per 20/15/10m QSO with different continent
-# Non-NA: 2 points per 160/80/40m QSO with same continent different country
-# Non-NA: 1 point per 20/15/10m QSO with same continent different country
-# NA: 4 points per 160/80/40m QSO with same continent different country
-# NA: 2 points per 20/15/10m QSO with same continent different country
-# All: 1 point per QSO with same country
-#  	Multipliers:	Prefixes once
-#  	Score Calculation:	Total score = total QSO points x total mults
-#  	E-mail logs to:	(none)
-#  	Upload log at:	https://www.cqwpx.com/logcheck/
-#  	Mail logs to:	(none)
-#  	Find rules at:	https://www.cqwpx.com/rules.htm
-#  	Cabrillo name:	CQ-WPX-CW
-
-
 import datetime
 from pathlib import Path
 
 # Import path may change depending on if it's dev or production.
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "CQ WPX CW"
 cabrillo_name = "CQ-WPX-CW"
@@ -145,7 +104,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -156,7 +114,7 @@ def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding)
 def cabrillo(self, file_encoding="utf-8"):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -193,7 +151,7 @@ def cabrillo(self, file_encoding="utf-8"):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -205,19 +163,19 @@ def cabrillo(self, file_encoding="utf-8"):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -232,26 +190,26 @@ def cabrillo(self, file_encoding="utf-8"):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -268,7 +226,7 @@ def cabrillo(self, file_encoding="utf-8"):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -341,7 +299,7 @@ def cabrillo(self, file_encoding="utf-8"):
                     file_encoding,
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving log: {ioerror}")
         return
 

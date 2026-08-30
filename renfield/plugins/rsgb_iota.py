@@ -1,58 +1,16 @@
 """RSGB-IOTA"""
 
-# Status:               Active
-# Geographic Focus:     Worldwide
-# Participation:        Worldwide
-# Mode:                 CW, SSB
-# Bands:                80, 40, 20, 15, 10m
-# Classes:              Single Op (12/24 hrs | Island-Fixed/Island-DXped/World | CW/SSB/Mixed | QRP/Low/High)
-#                       Single Op Assisted (12/24 hrs | Island/World | CW/SSB/Mixed | QRP/Low/High)
-#                       Single Op Overlay:  Newcomer
-#                       Multi-Single (Island-Fixed/Island-DXped | Low/High)
-#                       Multi-Two (Island-Fixed/Island-DXped | Low/High)
-# Max power:	        HP: 1500 watts
-#                       LP: 100 watts
-#                       QRP: 5 watts
-# Exchange:             RS(T) + Serial No. + IOTA No.(if applicable)
-# Work stations:        Once per band per mode
-# QSO Points:           (see rules)
-# Multipliers:          Each IOTA reference once per band per mode
-# Score Calculation:	Total score = total QSO points x total mults
-# E-mail logs to:       (none)
-# Upload log at:        http://www.rsgbcc.org/cgi-bin/hfenter.pl
-# Mail logs to:         (none)
-# Find rules at:        https://www.rsgbcc.org/hf/rules/2025/riota.shtml
-# Cabrillo name:        RSGB-IOTA
-
-
-# (a) Island Stations contacting:
-#         World Stations: 5 points
-#         Island Stations having the same IOTA reference: 5 points
-#         Other Island Stations: 15 points
-# (b) World Stations contacting:
-#         World Stations: 2 points
-#         Island Stations: 15 points
-
-# (c) Multiplier. The multiplier is the total of different IOTA references contacted on each band on CW,
-#         plus the total of different IOTA references contacted on each band on SSB
-
-# (d) The Total Score is the total of QSO points on all bands added together,
-#         multiplied by the total of multipliers on all bands added together
-
-
-# pylint: disable=invalid-name, unused-argument, unused-variable, c-extension-no-member, unused-import
-
 import datetime
 from pathlib import Path
 
 try:
-    from lib.ham_utility import get_logged_band
     from lib.plugin_common import gen_adif, get_points, online_score_xml
     from lib.version import __version__
 except (ImportError, ModuleNotFoundError):
-    from renfield.lib.ham_utility import get_logged_band
     from renfield.lib.plugin_common import gen_adif, get_points, online_score_xml
     from renfield.lib.version import __version__
+
+assert online_score_xml
 
 name = "RSGB-IOTA"
 cabrillo_name = "RSGB-IOTA"
@@ -68,9 +26,7 @@ def show_mults(self):
     # plus the total of different IOTA references contacted on each band on SSB.
     # Island Multi-Op stations may not contact members of their own group for multiplier credit.
 
-    query = query = (
-        f"select count(DISTINCT(SUBSTR(Nr, INSTR(Nr, ' ') + 1) || ':' || Mode || ':' || Band)) as mults from DXLOG where ContestNR = {self.pref.get('contest', '1')} and INSTR(NR, ' ');"
-    )
+    query = f"select count(DISTINCT(SUBSTR(Nr, INSTR(Nr, ' ') + 1) || ':' || Mode || ':' || Band)) as mults from DXLOG where ContestName = '{self.database.current_contest}' and INSTR(NR, ' ');"
     result = self.database.exec_sql(query)
     mult_count = result.get("mults", 0)
 
@@ -104,7 +60,6 @@ def adif(self):
 
 
 def output_cabrillo_line(line_to_output, ending, file_descriptor, file_encoding):
-    """"""
     print(
         line_to_output.encode(file_encoding, errors="ignore").decode(),
         end=ending,
@@ -125,7 +80,7 @@ def convert_iota_number(iota: str) -> str:
 def cabrillo(self, file_encoding):
     """Generates Cabrillo file. Maybe."""
     # https://www.cqwpx.com/cabrillo.htm
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().astimezone()
     date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = (
         str(Path.home())
@@ -162,7 +117,7 @@ def cabrillo(self, file_encoding):
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"CALLSIGN: {self.station.get('Call','')}",
+                f"CALLSIGN: {self.station.get('Call', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -174,19 +129,19 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory','')}",
+                f"CATEGORY-OPERATOR: {self.contest_settings.get('OperatorCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory','')}",
+                f"CATEGORY-ASSISTED: {self.contest_settings.get('AssistedCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory','')}",
+                f"CATEGORY-BAND: {self.contest_settings.get('BandCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -201,26 +156,26 @@ def cabrillo(self, file_encoding):
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory','')}",
+                f"CATEGORY-TRANSMITTER: {self.contest_settings.get('TransmitterCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             if self.contest_settings.get("OverlayCategory", "") != "N/A":
                 output_cabrillo_line(
-                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory','')}",
+                    f"CATEGORY-OVERLAY: {self.contest_settings.get('OverlayCategory', '')}",
                     "\r\n",
                     file_descriptor,
                     file_encoding,
                 )
             output_cabrillo_line(
-                f"GRID-LOCATOR: {self.station.get('GridSquare','')}",
+                f"GRID-LOCATOR: {self.station.get('GridSquare', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
             )
             output_cabrillo_line(
-                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory','')}",
+                f"CATEGORY-POWER: {self.contest_settings.get('PowerCategory', '')}",
                 "\r\n",
                 file_descriptor,
                 file_encoding,
@@ -237,7 +192,7 @@ def cabrillo(self, file_encoding):
             for op in list_of_ops:
                 ops += f"{op.get('Operator', '')}, "
             if self.station.get("Call", "") not in ops:
-                ops += f"@{self.station.get('Call','')}"
+                ops += f"@{self.station.get('Call', '')}"
             else:
                 ops = ops.rstrip(", ")
             output_cabrillo_line(
@@ -326,7 +281,7 @@ def cabrillo(self, file_encoding):
                 )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
         self.show_message_box(f"Cabrillo saved to: {filename}")
-    except IOError as ioerror:
+    except OSError as ioerror:
         self.log_info(f"Error saving log: {ioerror}")
         return
 
@@ -336,12 +291,8 @@ def recalculate_mults(self):
 
 
 def get_mults(self):
-    """"""
-
-    mults = {}
-    return mults
+    return show_mults(self)
 
 
 def just_points(self):
-    """"""
     return get_points(self)
