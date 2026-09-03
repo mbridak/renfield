@@ -10,8 +10,8 @@ authors = [
 dependencies = [
     "appdata>=2.2.1",
     "dicttoxml>=1.7.16",
-    "rich>=14.1.0",
-    "textual>=6.2.0",
+    "rich>=15.0.0",
+    "textual>=8.2.8",
 ]
 
 [build-system]
