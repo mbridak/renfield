@@ -10,6 +10,9 @@ This will be the Not1MM contest data aggregation server. It's currently not feat
 
 ## Recent Changes
 
+- [2026-10-04] @mbridak Fix CQP Cabrillo output of county line contacts.
+  - @mbridak Fix: cq ww rtty dx mult count.
+- [2026-09-02] @mbridak Updated textual and rich version numbers
 - [2026-08-30] @mbridak fix operator info window band display.
   - @mbridak Add mhz_to_band function to convert MHz to band name
   - Refactor ham_utility.py: reorganize imports, enhance suffix handling, and introduce Ba...
