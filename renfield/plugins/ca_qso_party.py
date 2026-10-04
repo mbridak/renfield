@@ -413,19 +413,22 @@ def cabrillo(self, file_encoding):
                 # The Cabrillo format is:
                 # QSO: freq mo date time my_call sent_nr sent_qth their_call recv_nr recv_qth
                 my_qth = self.contest_settings.get("SentExchange", "").upper()
-
-                output_cabrillo_line(
-                    f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
-                    f"{contact.get('StationPrefix', '').ljust(13)} "
-                    f"{sent_nr.ljust(6)} "
-                    f"{my_qth.ljust(5)} "
-                    f"{contact.get('Call', '').ljust(13)} "
-                    f"{recv_nr.ljust(6)} "
-                    f"{sent_qth.ljust(5)}",
-                    "\r\n",
-                    file_descriptor,
-                    file_encoding,
-                )
+                mycountyline = my_qth.strip("# ").split("/")
+                countyline = sent_qth.split("/")
+                for _, mcl in enumerate(mycountyline):
+                    for _, the_qth in enumerate(countyline):
+                        output_cabrillo_line(
+                            f"QSO: {frequency} {themode} {loggeddate} {loggedtime} "
+                            f"{contact.get('StationPrefix', '').ljust(13)} "
+                            f"{sent_nr.ljust(6)} "
+                            f"{mcl.ljust(5)} "
+                            f"{contact.get('Call', '').ljust(13)} "
+                            f"{recv_nr.ljust(6)} "
+                            f"{the_qth.ljust(5)}",
+                            "\r\n",
+                            file_descriptor,
+                            file_encoding,
+                        )
             output_cabrillo_line("END-OF-LOG:", "\r\n", file_descriptor, file_encoding)
         self.log_info(f"Cabrillo saved to: {filename}")
     except OSError as exception:
