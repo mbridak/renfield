@@ -457,9 +457,9 @@ class Application(App):
                 sendme, (self.MULTICAST_GROUP, self.MULTICAST_PORT)
             )
             self.update_contacts_window()
-            self.log_info(f'{json_data.get("Band", "0.0")=}')
+            # self.log_info(f'{json_data.get("Band", "0.0")=}')
             the_band = mhz_to_band(float(json_data.get("Band", "0.0")))
-            self.log_info(f"{the_band=}")
+            # self.log_info(f"{the_band=}")
             self.operators_seen[json_data.get("Operator", "Unknown")] = [
                 json_data.get("NetBiosName", "Unknown"),
                 the_band,
