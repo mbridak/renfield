@@ -1,5 +1,12 @@
 # renfield
 
+[![PyPI](https://img.shields.io/pypi/v/renfield)](https://pypi.org/project/renfield/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Python: 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/renfield?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=GREEN&left_text=Monthly%20Downloads)](https://pepy.tech/projects/renfield)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/renfield?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=GREEN&left_text=Total%20Downloads)](https://pepy.tech/projects/renfield)
+
+
 ![CLI Screenshot](https://github.com/mbridak/renfield/raw/refs/heads/main/renfield2.svg)
 
 <center>^ I was bored. Kinda reminds me of Sun Microsystems. ^</center>
